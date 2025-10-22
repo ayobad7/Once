@@ -1,0 +1,19 @@
+backend:
+  name: git-gateway
+  branch: main # The branch to update (usually main or master)
+
+# The folder where Netlify CMS will store the images
+media_folder: "public/images"
+# The public path where images are stored (relative to the site root)
+public_folder: "/images"
+
+# Define the collections (folders where content files are stored)
+collections:
+  - name: "gallery" # Unique identifier for this collection
+    label: "Gallery Items" # Label shown in the CMS UI
+    folder: "content/gallery" # The folder in your repo where files are stored
+    create: true # Allow users to create new posts
+    fields: # The fields for each entry
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Image", name: "image", widget: "image", media_library: { config: { max_file_size: 1024 } } } # Optional: limit file size
+      - { label: "Description", name: "description", widget: "text" }
