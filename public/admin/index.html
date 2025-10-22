@@ -4,21 +4,9 @@
     <meta charset="utf-8" />
     <title>Content Manager</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Load the Netlify CMS script -->
-    <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
-    <!-- Optional: Add this script to ensure the widget is initialized -->
-    <script>
-      // Initialize the Netlify Identity Widget
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on('init', user => {
-          if (!user) {
-            window.netlifyIdentity.open();
-          }
-        });
-      }
-    </script>
   </head>
   <body>
-    <!-- The CMS will attach itself to the body -->
+    <!-- The Netlify CMS script will automatically attach itself to the body -->
+    <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
   </body>
 </html>
