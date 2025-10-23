@@ -241,7 +241,11 @@ function AdminPage() {
               >
                 <ListItemText
                   primary={item.title}
-                  secondary={item.description.substring(0, 50) + '...'}
+                  secondary={
+                    item.description
+                      ? item.description.substring(0, 50) + '...'
+                      : 'No description'
+                  } // Add a safety check
                 />
               </ListItem>
             ))}
