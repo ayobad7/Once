@@ -1,4 +1,4 @@
-// src/pages/AdminPage.jsx (Updated for New Features)
+// src/pages/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -45,6 +45,8 @@ function AdminPage() {
     imageUrl: '', // Main image URL
     email: '', // Optional: User's email for avatar
     additionalImages: [], // Array to store up to 8 additional image URLs
+    itemType: 'showcase', // Default to showcase
+    category: '', // New field for category
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
@@ -101,6 +103,13 @@ function AdminPage() {
     }));
   };
 
+  const handleItemTypeChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      itemType: e.target.value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.imageUrl) {
@@ -119,6 +128,8 @@ function AdminPage() {
           (img) => img.trim() !== ''
         ), // Filter out empty strings
         timestamp: new Date(), // Add a timestamp
+        itemType: formData.itemType, // Add the itemType field
+        category: formData.category, // Add the category field
       });
 
       setMessage('Gallery item added successfully!');
@@ -128,6 +139,8 @@ function AdminPage() {
         imageUrl: '',
         email: '',
         additionalImages: [],
+        itemType: 'showcase', // Reset to default
+        category: '', // Reset category field
       }); // Reset form
       loadGalleryItems(); // Refresh the list
     } catch (error) {
@@ -242,6 +255,42 @@ function AdminPage() {
               margin='normal'
               placeholder='Enter your email for the avatar'
             />
+            <TextField
+              fullWidth
+              label='Category'
+              name='category'
+              value={formData.category}
+              onChange={handleInputChange}
+              margin='normal'
+              placeholder='Enter the category for this item'
+            />
+            <FormControl component='fieldset' sx={{ mt: 2 }}>
+              <FormLabel component='legend'>Item Type</FormLabel>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.itemType === 'showcase'}
+                      onChange={handleItemTypeChange}
+                      value='showcase'
+                      name='itemType'
+                    />
+                  }
+                  label='Showcase'
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.itemType === 'tutorial'}
+                      onChange={handleItemTypeChange}
+                      value='tutorial'
+                      name='itemType'
+                    />
+                  }
+                  label='Tutorial'
+                />
+              </FormGroup>
+            </FormControl>
             <FormControl component='fieldset' sx={{ mt: 2 }}>
               <FormLabel component='legend'>
                 Additional Images (Up to 8)
