@@ -1,3 +1,4 @@
+// src/pages/AdminPage.jsx (Modified for Image URL - Corrected)
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -16,34 +17,63 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Link, // Import Link for potential GitHub login
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-// We'll use localStorage for now, but later this will connect to Netlify CMS
+// Import useNavigate hook from react-router-dom
+import { useNavigate } from 'react-router-dom';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { db } from '../firebase'; // Adjust path if needed
 import {
-  saveGalleryItem,
-  getGalleryItems,
-  deleteGalleryItem,
-} from '../data/galleryData';
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
 
 function AdminPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    image: '', // This will hold the image URL/path
+    imageUrl: '', // Changed from imageFile to imageUrl
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  // Initialize the navigate function
+  const navigate = useNavigate();
+  const auth = getAuth();
 
+  // Check authentication state on component mount
   useEffect(() => {
-    loadGalleryItems();
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // User is not logged in, redirect to login
+        navigate('/login');
+      } else {
+        // User is logged in, load gallery items
+        loadGalleryItems();
+      }
+    });
 
-  const loadGalleryItems = () => {
-    const items = getGalleryItems();
-    setGalleryItems(items);
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [auth, navigate]); // Include navigate in the dependency array
+
+  // Function to load gallery items from Firestore
+  const loadGalleryItems = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'galleryItems'));
+      const items = querySnapshot.docs.map((doc) => ({
+        id: doc.id, // Include the Firestore document ID
+        ...doc.data(),
+      }));
+      setGalleryItems(items);
+    } catch (error) {
+      console.error('Error loading gallery items:', error);
+      setMessage('Failed to load gallery items');
+    }
   };
 
   const handleInputChange = (e) => {
@@ -54,51 +84,51 @@ function AdminPage() {
     }));
   };
 
-  // For local development, we'll use a file input to get the image URL
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData((prev) => ({
-          ...prev,
-          image: e.target.result, // This is the data URL
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.image) {
-      setMessage('Please fill in all fields');
+    if (!formData.title || !formData.description || !formData.imageUrl) {
+      setMessage('Please fill in all fields and provide an image URL');
       return;
     }
 
-    saveGalleryItem(formData);
-    setFormData({ title: '', description: '', image: '' });
-    setMessage('Gallery item saved successfully! (Using localStorage for now)');
-    loadGalleryItems(); // Refresh the list
+    try {
+      // Save gallery item data (including image URL) to Firestore
+      await addDoc(collection(db, 'galleryItems'), {
+        title: formData.title,
+        description: formData.description,
+        image: formData.imageUrl, // Store the image URL directly
+        timestamp: new Date(), // Optional: Add a timestamp
+      });
 
-    setTimeout(() => setMessage(''), 3000);
+      setMessage('Gallery item added successfully!');
+      setFormData({ title: '', description: '', imageUrl: '' }); // Reset form
+      loadGalleryItems(); // Refresh the list
+    } catch (error) {
+      console.error('Error saving item to Firestore:', error);
+      setMessage('Failed to save gallery item');
+    }
   };
 
-  const handleDeleteClick = (index) => {
-    setItemToDelete(index);
+  const handleDeleteClick = (id) => {
+    // Pass the Firestore document ID
+    setItemToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (itemToDelete !== null) {
-      deleteGalleryItem(itemToDelete);
-      setDeleteDialogOpen(false);
-      setItemToDelete(null);
-      loadGalleryItems(); // Refresh the list
-      setMessage(
-        'Gallery item deleted successfully! (Using localStorage for now)'
-      );
-      setTimeout(() => setMessage(''), 3000);
+  const confirmDelete = async () => {
+    if (itemToDelete) {
+      try {
+        await deleteDoc(doc(db, 'galleryItems', itemToDelete)); // Delete using the document ID
+        setMessage('Gallery item deleted successfully!');
+        setDeleteDialogOpen(false);
+        setItemToDelete(null);
+        loadGalleryItems(); // Refresh the list
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        setMessage('Failed to delete gallery item');
+        setDeleteDialogOpen(false);
+        setItemToDelete(null);
+      }
     }
   };
 
@@ -107,27 +137,34 @@ function AdminPage() {
     setItemToDelete(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login'); // Redirect to login after logout
+    } catch (error) {
+      console.error('Logout error:', error);
+      setMessage('Logout failed');
+    }
+  };
+
   return (
     <Container maxWidth='md' sx={{ py: 4 }}>
       <Typography variant='h4' component='h1' gutterBottom>
-        Admin Panel (Local Storage Demo)
+        Admin Panel (Image URL)
       </Typography>
-      <Typography variant='body2' color='textSecondary' gutterBottom>
-        Note: This current version uses browser localStorage. The final version
-        will connect to GitHub via Netlify CMS.
-      </Typography>
-      <Typography variant='body2' color='textSecondary' gutterBottom>
-        To use the live admin panel, go to{' '}
-        <Link href='/admin' target='_blank'>
-          /admin
-        </Link>{' '}
-        after deployment.
-      </Typography>
+      <Button
+        onClick={handleLogout}
+        variant='outlined'
+        color='secondary'
+        size='small'
+      >
+        Logout
+      </Button>
 
       {message && (
         <Alert
           severity={message.includes('successfully') ? 'success' : 'error'}
-          sx={{ mb: 2 }}
+          sx={{ mt: 2, mb: 2 }}
         >
           {message}
         </Alert>
@@ -159,21 +196,25 @@ function AdminPage() {
               rows={3}
               required
             />
-            <input
-              type='file'
-              accept='image/*'
-              onChange={handleImageUpload}
-              style={{ marginTop: '16px' }}
+            <TextField
+              fullWidth
+              label='Image URL'
+              name='imageUrl'
+              value={formData.imageUrl}
+              onChange={handleInputChange}
+              margin='normal'
+              required
+              placeholder='Paste the direct link to your image (e.g., from Discord, Imgur, etc.)'
             />
             <Button
               type='submit'
               variant='contained'
               sx={{ mt: 2 }}
               disabled={
-                !formData.title || !formData.description || !formData.image
+                !formData.title || !formData.description || !formData.imageUrl
               }
             >
-              Add to Gallery (Local)
+              Add to Gallery
             </Button>
           </form>
         </CardContent>
@@ -185,14 +226,14 @@ function AdminPage() {
             Existing Gallery Items ({galleryItems.length})
           </Typography>
           <List>
-            {galleryItems.map((item, index) => (
+            {galleryItems.map((item) => (
               <ListItem
-                key={index}
+                key={item.id} // Use the Firestore document ID as the key
                 secondaryAction={
                   <IconButton
                     edge='end'
                     aria-label='delete'
-                    onClick={() => handleDeleteClick(index)}
+                    onClick={() => handleDeleteClick(item.id)} // Pass the Firestore document ID
                   >
                     <DeleteIcon />
                   </IconButton>
