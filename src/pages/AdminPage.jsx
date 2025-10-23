@@ -1,5 +1,6 @@
-// src/pages/AdminPage.jsx (Modified for Image URL - Corrected)
+// src/pages/AdminPage.jsx (Updated for New Features)
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -17,10 +18,16 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  ImageList,
+  ImageListItem,
+  Input,
+  FormControl,
+  FormLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-// Import useNavigate hook from react-router-dom
-import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db } from '../firebase'; // Adjust path if needed
 import {
@@ -35,13 +42,14 @@ function AdminPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    imageUrl: '', // Changed from imageFile to imageUrl
+    imageUrl: '', // Main image URL
+    email: '', // Optional: User's email for avatar
+    additionalImages: [], // Array to store up to 8 additional image URLs
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  // Initialize the navigate function
   const navigate = useNavigate();
   const auth = getAuth();
 
@@ -59,14 +67,14 @@ function AdminPage() {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, [auth, navigate]); // Include navigate in the dependency array
+  }, [auth, navigate]);
 
   // Function to load gallery items from Firestore
   const loadGalleryItems = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, 'galleryItems'));
       const items = querySnapshot.docs.map((doc) => ({
-        id: doc.id, // Include the Firestore document ID
+        id: doc.id,
         ...doc.data(),
       }));
       setGalleryItems(items);
@@ -84,10 +92,19 @@ function AdminPage() {
     }));
   };
 
+  const handleAdditionalImageChange = (index, value) => {
+    const newAdditionalImages = [...formData.additionalImages];
+    newAdditionalImages[index] = value;
+    setFormData((prev) => ({
+      ...prev,
+      additionalImages: newAdditionalImages,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.imageUrl) {
-      setMessage('Please fill in all fields and provide an image URL');
+      setMessage('Please fill in all required fields');
       return;
     }
 
@@ -96,12 +113,22 @@ function AdminPage() {
       await addDoc(collection(db, 'galleryItems'), {
         title: formData.title,
         description: formData.description,
-        image: formData.imageUrl, // Store the image URL directly
-        timestamp: new Date(), // Optional: Add a timestamp
+        image: formData.imageUrl, // Main image URL
+        email: formData.email, // Optional: User's email
+        additionalImages: formData.additionalImages.filter(
+          (img) => img.trim() !== ''
+        ), // Filter out empty strings
+        timestamp: new Date(), // Add a timestamp
       });
 
       setMessage('Gallery item added successfully!');
-      setFormData({ title: '', description: '', imageUrl: '' }); // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        imageUrl: '',
+        email: '',
+        additionalImages: [],
+      }); // Reset form
       loadGalleryItems(); // Refresh the list
     } catch (error) {
       console.error('Error saving item to Firestore:', error);
@@ -198,14 +225,44 @@ function AdminPage() {
             />
             <TextField
               fullWidth
-              label='Image URL'
+              label='Main Image URL'
               name='imageUrl'
               value={formData.imageUrl}
               onChange={handleInputChange}
               margin='normal'
               required
-              placeholder='Paste the direct link to your image (e.g., from Discord, Imgur, etc.)'
+              placeholder='Paste the direct link to your main image'
             />
+            <TextField
+              fullWidth
+              label='Email (Optional)'
+              name='email'
+              value={formData.email}
+              onChange={handleInputChange}
+              margin='normal'
+              placeholder='Enter your email for the avatar'
+            />
+            <FormControl component='fieldset' sx={{ mt: 2 }}>
+              <FormLabel component='legend'>
+                Additional Images (Up to 8)
+              </FormLabel>
+              <FormGroup>
+                {[...Array(8)].map((_, index) => (
+                  <TextField // Use TextField instead of Input inside FormControlLabel
+                    key={index}
+                    type='text'
+                    value={formData.additionalImages[index] || ''}
+                    onChange={(e) =>
+                      handleAdditionalImageChange(index, e.target.value)
+                    }
+                    placeholder={`Additional Image ${index + 1} URL`}
+                    sx={{ mt: 1 }}
+                    // Optional: Add helper text if needed
+                    // helperText={`Link for Image ${index + 1}`}
+                  />
+                ))}
+              </FormGroup>
+            </FormControl>
             <Button
               type='submit'
               variant='contained'
@@ -245,7 +302,7 @@ function AdminPage() {
                     item.description
                       ? item.description.substring(0, 50) + '...'
                       : 'No description'
-                  } // Add a safety check
+                  }
                 />
               </ListItem>
             ))}
