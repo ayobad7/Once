@@ -47,8 +47,8 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
 
   return (
     <AppBar
-      position="fixed"
-      color="default"
+      position='fixed'
+      color='default'
       enableColorOnDark
       sx={{
         boxShadow: 0,
@@ -57,9 +57,9 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
         mt: '28px', // Adjust as needed
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth='lg' disableGutters>
         <Toolbar
-          variant="dense"
+          variant='dense'
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -71,20 +71,34 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
             borderColor: appBarBorderColor,
             backgroundColor: appBarBgColor,
             boxShadow: appBarShadow,
+            // Responsive margins
+            ml: { xs: '32px', sm: '50px', md: '50px' },
+            mr: { xs: '33px', sm: '50px', md: '50px' },
           }}
         >
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
+            <Typography
+              variant='h6'
+              color='inherit'
+              noWrap
+              sx={{ flexGrow: 1 }}
+            >
               Sitemark
             </Typography>
             {/* Desktop Navigation Links - Hidden on mobile */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                gap: 1,
+                alignItems: 'center',
+              }}
+            >
               {mobileNavItems.map((item) => (
                 <Button
                   key={item.text}
-                  variant="text"
-                  color="inherit"
-                  size="small"
+                  variant='text'
+                  color='inherit'
+                  size='small'
                   href={item.href}
                   sx={{ borderRadius: '20px' }} // Pill shape for buttons
                 >
@@ -102,15 +116,15 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
           >
             {/* Redirect Sign In to Admin */}
             <Button
-              variant="outlined"
-              color="inherit"
-              size="small"
+              variant='outlined'
+              color='inherit'
+              size='small'
               component={Link} // Use Link for internal routing
-              to="/admin" // Redirect to /admin
+              to='/admin' // Redirect to /admin
               sx={{
                 borderRadius: '20px', // Pill shape for button
                 my: 1,
-                mx: 1.5
+                mx: 1.5,
               }}
             >
               Sign in
@@ -118,44 +132,66 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
             {/* Dark/Light Mode Toggle Button */}
             <Button
               onClick={onToggleTheme}
-              color="inherit"
-              size="small"
+              color='inherit'
+              size='small'
               sx={{
                 borderRadius: '20px', // Pill shape for button
                 my: 1,
                 mx: 1.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)' // Example light hover
-                }
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)', // Example light hover
+                },
               }}
-              startIcon={currentMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+              startIcon={
+                currentMode === 'dark' ? (
+                  <Brightness7Icon />
+                ) : (
+                  <Brightness4Icon />
+                )
+              }
             >
               {currentMode === 'dark' ? 'Light' : 'Dark'}
             </Button>
           </Box>
 
           {/* Mobile Menu Button - Hidden on desktop */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
             <Button
               onClick={onToggleTheme}
-              color="inherit"
-              size="small"
+              color='inherit'
+              size='small'
               sx={{
                 borderRadius: '20px', // Pill shape for mobile toggle
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)' // Example light hover
-                }
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)', // Example light hover
+                },
               }}
-              startIcon={currentMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+              startIcon={
+                currentMode === 'dark' ? (
+                  <Brightness7Icon />
+                ) : (
+                  <Brightness4Icon />
+                )
+              }
             >
-              {currentMode === 'dark' ? 'L' : 'D'} {/* Shorter text for mobile */}
+              {currentMode === 'dark' ? 'L' : 'D'}{' '}
+              {/* Shorter text for mobile */}
             </Button>
             <Button
-              color="inherit"
-              aria-label="open drawer"
-              edge="end"
+              color='inherit'
+              aria-label='open drawer'
+              edge='end'
               onClick={handleDrawerToggle}
-              sx={{ borderRadius: '20px', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }} // Pill shape for menu button
+              sx={{
+                borderRadius: '20px',
+                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' },
+              }} // Pill shape for menu button
             >
               <MenuIcon />
             </Button>
@@ -166,8 +202,8 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
       {/* Mobile Navigation Drawer */}
       <nav>
         <Drawer
-          anchor="top" // Anchor to the top
-          variant="temporary"
+          anchor='top' // Anchor to the top
+          variant='temporary'
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
@@ -194,7 +230,14 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
             <List>
               {mobileNavItems.map((item) => (
                 <ListItem key={item.text} disablePadding>
-                  <ListItemButton component="a" href={item.href} onClick={handleDrawerToggle} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
+                  <ListItemButton
+                    component='a'
+                    href={item.href}
+                    onClick={handleDrawerToggle}
+                    sx={{ borderRadius: '20px', mx: 1 }}
+                  >
+                    {' '}
+                    {/* Pill shape for list items */}
                     <ListItemText primary={item.text} />
                   </ListItemButton>
                 </ListItem>
@@ -204,14 +247,33 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
             <List>
               {/* Sign In Link in Mobile Menu */}
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/admin" onClick={handleDrawerToggle} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
-                  <ListItemText primary="Sign in" />
+                <ListItemButton
+                  component={Link}
+                  to='/admin'
+                  onClick={handleDrawerToggle}
+                  sx={{ borderRadius: '20px', mx: 1 }}
+                >
+                  {' '}
+                  {/* Pill shape for list items */}
+                  <ListItemText primary='Sign in' />
                 </ListItemButton>
               </ListItem>
               {/* Theme Toggle in Mobile Menu (Optional) */}
               <ListItem disablePadding>
-                <ListItemButton onClick={() => { onToggleTheme(); handleDrawerToggle(); }} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
-                  <ListItemText primary={currentMode === 'dark' ? 'Light Mode' : 'Dark Mode'} />
+                <ListItemButton
+                  onClick={() => {
+                    onToggleTheme();
+                    handleDrawerToggle();
+                  }}
+                  sx={{ borderRadius: '20px', mx: 1 }}
+                >
+                  {' '}
+                  {/* Pill shape for list items */}
+                  <ListItemText
+                    primary={
+                      currentMode === 'dark' ? 'Light Mode' : 'Dark Mode'
+                    }
+                  />
                 </ListItemButton>
               </ListItem>
             </List>

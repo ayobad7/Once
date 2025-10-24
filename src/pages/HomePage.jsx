@@ -9,12 +9,14 @@ import {
 } from '@mui/material';
 import { db } from '../firebase'; // Adjust path if needed
 import { collection, getDocs, orderBy, query } from 'firebase/firestore'; // Import orderBy and query
-import AppAppBar from '../components/AppAppBar'; // Make sure this path is correct
-import MainContent from '../components/MainContent'; // Make sure this path is correct
-import Footer from '../components/Footer'; // Make sure this path is correct
-import Latest from '../components/Latest'; // Make sure this path is correct
-import ShowcaseCard from '../components/ShowcaseCard'; // Make sure this path is correct
-import TutorialCard from '../components/TutorialCard'; // Make sure this path is correct
+// --- Add the import for AppAppBar ---
+import AppAppBar from '../components/AppAppBar'; // Adjust the path if AppAppBar is in a different location
+// --- Add the import for MainContent and Footer ---
+import MainContent from '../components/MainContent'; // Adjust the path
+import Footer from '../components/Footer'; // Adjust the path
+// --- Add the import for ShowcaseCard and TutorialCard ---
+import ShowcaseCard from '../components/ShowcaseCard'; // Adjust the path
+import TutorialCard from '../components/TutorialCard'; // Adjust the path
 
 function HomePage({ onToggleTheme }) {
   // Accept onToggleTheme prop
@@ -78,12 +80,13 @@ function HomePage({ onToggleTheme }) {
       <AppAppBar onToggleTheme={onToggleTheme} />{' '}
       {/* Pass onToggleTheme to AppAppBar */}
       <MainContent>
-        <Container maxWidth='lg' sx={{ py: 4 }}>
+        {/* Match the Container's sx props from AppAppBar.jsx */}
+        <Container maxWidth='lg' sx={{ py: 9, px: 2 }}>
           <Typography variant='h2' component='h1' gutterBottom align='center'>
-            Blog
+            We Build Stuff
           </Typography>
           <Typography variant='h6' component='h2' gutterBottom align='center'>
-            Stay in the loop with the latest about our products
+            Even though things always broken
           </Typography>
 
           {/* Showcase Items - 2 per row */}

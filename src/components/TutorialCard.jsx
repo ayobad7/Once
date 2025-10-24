@@ -13,31 +13,52 @@ import {
   ImageList,
   ImageListItem,
 } from '@mui/material';
+import { styled } from '@mui/material/styles'; // Import styled
+
+// Use styled components like the template
+const StyledCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%', // Ensure full height
+  // Use outlined variant styling
+  border: '1px solid',
+  borderColor: (theme.vars || theme).palette.divider, // Use theme divider color
+  backgroundColor: (theme.vars || theme).palette.background.paper, // Use theme paper color
+  '&:hover': {
+    // Optional: Add a subtle hover effect
+    backgroundColor: (theme.vars || theme).palette.action.hover,
+  },
+  borderRadius: theme.shape.borderRadius, // Use theme border radius
+}));
+
+const StyledCardContent = styled(CardContent)({
+  flexGrow: 1, // Ensure content takes available space
+  padding: 16, // Match template padding
+  '&:last-child': {
+    paddingBottom: 16, // Match template padding
+  },
+});
 
 function TutorialCard({ item }) {
   return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.paper', // Use theme's paper color
-        color: 'text.primary', // Use theme's text color
-        border: '1px solid', // Use theme's divider color
-        borderColor: 'divider', // Set border color to theme's divider color
-        borderRadius: 4, // Increased border radius for more rounded corners
-        boxShadow: 'none', // Remove shadow for flat look
-      }}
-    >
+    <StyledCard variant='outlined'>
+      {' '}
+      {/* Use outlined variant */}
       {item.image && (
         <CardMedia
           component='img'
           height='194'
           image={item.image} // Use 'image' field from Firebase
           alt={item.title}
+          sx={{
+            borderBottom: '1px solid', // Add border below image like template
+            borderColor: (theme) => (theme.vars || theme).palette.divider,
+          }}
         />
       )}
-      <CardContent sx={{ flexGrow: 1 }}>
+      <StyledCardContent>
+        {' '}
+        {/* Use styled CardContent */}
         <Typography variant='caption' color='text.secondary' gutterBottom>
           {item.category || 'Category'} {/* Display category field */}
         </Typography>
@@ -75,8 +96,10 @@ function TutorialCard({ item }) {
             </ImageList>
           </>
         )}
-      </CardContent>
-      <CardActions sx={{ justifyContent: 'space-between' }}>
+      </StyledCardContent>
+      <CardActions sx={{ justifyContent: 'space-between', padding: '16px' }}>
+        {' '}
+        {/* Match template padding */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {item.email && (
             <Avatar sx={{ bgcolor: '#ccc', mr: 1 }} aria-label='author'>
@@ -93,7 +116,7 @@ function TutorialCard({ item }) {
             : 'Unknown Date'}
         </Typography>
       </CardActions>
-    </Card>
+    </StyledCard>
   );
 }
 
