@@ -1,8 +1,10 @@
-// src/components/AppAppBar.jsx
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, useScrollTrigger, Container } from '@mui/material';
+// src/components/AppAppBar.jsx (Revised with Mobile Drawer)
+import React, { useState } from 'react';
+import { AppBar, Toolbar, Typography, Button, Box, useScrollTrigger, Container, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4'; // Dark mode icon
 import Brightness7Icon from '@mui/icons-material/Brightness7'; // Light mode icon
+import MenuIcon from '@mui/icons-material/Menu'; // Hamburger icon
+import { Link } from 'react-router-dom'; // Import Link for routing
 import { useTheme } from '@mui/material/styles'; // Use useTheme hook to get current theme
 
 function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
@@ -13,109 +15,209 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
     threshold: 0,
   });
 
-  // Define semi-transparent colors for light and dark modes, considering the blur effect
-  // These colors are based on the theme's background and text colors for better integration
+  // State for mobile drawer
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  // Define semi-transparent colors for light and dark modes
   const appBarBgColor = currentMode === 'dark'
-    ? `rgba(${theme.palette.background.defaultChannel || '30, 30, 30'}, 0.4)` // Use theme channel if available, fallback to rgba(30,30,30, 0.4)
-    : `rgba(${theme.palette.background.defaultChannel || '255, 255, 255'}, 0.4)`; // Use theme channel if available, fallback to rgba(255,255,255, 0.4)
+    ? `rgba(${theme.palette.background.defaultChannel || '30, 30, 30'}, 0.4)`
+    : `rgba(${theme.palette.background.defaultChannel || '255, 255, 255'}, 0.4)`;
 
-  // Define border color based on mode
   const appBarBorderColor = currentMode === 'dark'
-    ? theme.palette.divider // Use theme divider color for dark mode
-    : theme.palette.divider; // Use theme divider color for light mode
+    ? theme.palette.divider
+    : theme.palette.divider;
 
-  // Define shadow based on mode and scroll
   const appBarShadow = trigger
-    ? (theme.vars || theme).shadows[1] // Use theme shadow when scrolled
-    : 'none'; // No shadow when at top
+    ? (theme.vars || theme).shadows[1]
+    : 'none';
+
+  // Mobile Navigation Items
+  const mobileNavItems = [
+    { text: 'Features', href: '#' },
+    { text: 'Testimonials', href: '#' },
+    { text: 'Highlights', href: '#' },
+    { text: 'Pricing', href: '#' },
+    { text: 'FAQ', href: '#' },
+    { text: 'Blog', href: '#' },
+  ];
 
   return (
     <AppBar
       position="fixed"
       color="default"
-      enableColorOnDark // Enable color adjustments for dark mode
+      enableColorOnDark
       sx={{
-        boxShadow: 0, // Remove default AppBar shadow
-        bgcolor: 'transparent', // Make AppBar background transparent
-        backgroundImage: 'none', // Ensure no background image
-        mt: '28px', // Add top margin if needed, adjust value as necessary
-        // Optional: Add margin to center if needed, but Container usually handles width
-        // mx: 'auto',
+        boxShadow: 0,
+        bgcolor: 'transparent',
+        backgroundImage: 'none',
+        mt: '28px', // Adjust as needed
       }}
     >
-      <Container maxWidth="lg"> {/* Constrain width like HomePage */}
+      <Container maxWidth="lg">
         <Toolbar
-          variant="dense" // Use dense variant if desired
-          disableGutters // Disable default gutters if you want full control
+          variant="dense"
           sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexShrink: 0,
-            borderRadius: `calc(${theme.shape.borderRadius}px + 8px)`, // Apply rounded corners
-            backdropFilter: 'blur(24px)', // Apply blur effect
-            border: '1px solid', // Add border
-            borderColor: appBarBorderColor, // Use dynamic border color
-            backgroundColor: appBarBgColor, // Use dynamic semi-transparent background color
-            boxShadow: appBarShadow, // Use dynamic shadow
-            padding: '8px 12px', // Adjust padding as needed
-            // Optional: Add margin if needed within the container
-            // mx: 2,
-            // my: 2,
+            borderRadius: '50px', // Pill shape for Toolbar
+            backdropFilter: 'blur(24px)',
+            border: '1px solid',
+            borderColor: appBarBorderColor,
+            backgroundColor: appBarBgColor,
+            boxShadow: appBarShadow,
           }}
         >
-          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
             <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
               Sitemark
             </Typography>
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <Button variant="text" color="inherit" size="small">
-                Features
-              </Button>
-              <Button variant="text" color="inherit" size="small">
-                Testimonials
-              </Button>
-              <Button variant="text" color="inherit" size="small">
-                Highlights
-              </Button>
-              <Button variant="text" color="inherit" size="small">
-                Pricing
-              </Button>
-              <Button variant="text" color="inherit" size="small" sx={{ minWidth: 0 }}>
-                FAQ
-              </Button>
-              <Button variant="text" color="inherit" size="small" sx={{ minWidth: 0 }}>
-                Blog
-              </Button>
+            {/* Desktop Navigation Links - Hidden on mobile */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+              {mobileNavItems.map((item) => (
+                <Button
+                  key={item.text}
+                  variant="text"
+                  color="inherit"
+                  size="small"
+                  href={item.href}
+                  sx={{ borderRadius: '20px' }} // Pill shape for buttons
+                >
+                  {item.text}
+                </Button>
+              ))}
             </Box>
           </Box>
           <Box
             sx={{
-              display: { xs: 'none', md: 'flex' },
+              display: { xs: 'none', md: 'flex' }, // Show on medium and large screens
               gap: 1,
               alignItems: 'center',
             }}
           >
-            <Button variant="outlined" color="inherit" size="small" sx={{ my: 1, mx: 1.5 }}>
+            {/* Redirect Sign In to Admin */}
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              component={Link} // Use Link for internal routing
+              to="/admin" // Redirect to /admin
+              sx={{
+                borderRadius: '20px', // Pill shape for button
+                my: 1,
+                mx: 1.5
+              }}
+            >
               Sign in
-            </Button>
-            <Button variant="contained" color="inherit" size="small" sx={{ my: 1, mx: 1.5 }}>
-              Sign up
             </Button>
             {/* Dark/Light Mode Toggle Button */}
             <Button
               onClick={onToggleTheme}
               color="inherit"
-              size="small" // Match button size
-              sx={{ my: 1, mx: 1.5 }}
+              size="small"
+              sx={{
+                borderRadius: '20px', // Pill shape for button
+                my: 1,
+                mx: 1.5,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)' // Example light hover
+                }
+              }}
               startIcon={currentMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
             >
               {currentMode === 'dark' ? 'Light' : 'Dark'}
             </Button>
           </Box>
-          {/* Mobile menu button would go here if needed */}
+
+          {/* Mobile Menu Button - Hidden on desktop */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, alignItems: 'center' }}>
+            <Button
+              onClick={onToggleTheme}
+              color="inherit"
+              size="small"
+              sx={{
+                borderRadius: '20px', // Pill shape for mobile toggle
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)' // Example light hover
+                }
+              }}
+              startIcon={currentMode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            >
+              {currentMode === 'dark' ? 'L' : 'D'} {/* Shorter text for mobile */}
+            </Button>
+            <Button
+              color="inherit"
+              aria-label="open drawer"
+              edge="end"
+              onClick={handleDrawerToggle}
+              sx={{ borderRadius: '20px', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }} // Pill shape for menu button
+            >
+              <MenuIcon />
+            </Button>
+          </Box>
         </Toolbar>
       </Container>
+
+      {/* Mobile Navigation Drawer */}
+      <nav>
+        <Drawer
+          anchor="top" // Anchor to the top
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              top: 'calc(28px + 64px)', // Position below the AppBar (adjust 28px if mt changes)
+              // Match the width constraints of the main content if needed, otherwise full width is fine
+              // width: 'auto', // Or specify a width if desired
+              borderRadius: '0 0 50px 50px', // Match the AppBar's bottom corners if desired, or keep square for top anchor
+            },
+          }}
+        >
+          <Box
+            sx={{
+              p: 2,
+              backgroundColor: appBarBgColor, // Match AppBar background
+              border: '1px solid',
+              borderColor: appBarBorderColor, // Match AppBar border
+              backdropFilter: 'blur(24px)', // Match AppBar blur
+            }}
+          >
+            <List>
+              {mobileNavItems.map((item) => (
+                <ListItem key={item.text} disablePadding>
+                  <ListItemButton component="a" href={item.href} onClick={handleDrawerToggle} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
+                    <ListItemText primary={item.text} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+            <Divider sx={{ my: 2 }} />
+            <List>
+              {/* Sign In Link in Mobile Menu */}
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/admin" onClick={handleDrawerToggle} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
+                  <ListItemText primary="Sign in" />
+                </ListItemButton>
+              </ListItem>
+              {/* Theme Toggle in Mobile Menu (Optional) */}
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => { onToggleTheme(); handleDrawerToggle(); }} sx={{ borderRadius: '20px', mx: 1 }}> {/* Pill shape for list items */}
+                  <ListItemText primary={currentMode === 'dark' ? 'Light Mode' : 'Dark Mode'} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Box>
+        </Drawer>
+      </nav>
     </AppBar>
   );
 }
