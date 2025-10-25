@@ -248,10 +248,7 @@ function AppAppBar({ onToggleTheme }) {
           }}
           sx={{
             '& .MuiDrawer-paper': {
-              top: 'calc(28px + 64px)', // Position below the AppBar (adjust 28px if mt changes)
-              // Match the width constraints of the main content if needed, otherwise full width is fine
-              // width: 'auto', // Or specify a width if desired
-              borderRadius: '0 0 50px 50px', // Match the AppBar's bottom corners if desired, or keep square for top anchor
+              borderRadius: '0 0 20px 20px', // Rounded bottom corners
             },
           }}
         >
@@ -264,6 +261,26 @@ function AppAppBar({ onToggleTheme }) {
               backdropFilter: 'blur(24px)', // Match AppBar blur
             }}
           >
+            {/* Logo and Title in Mobile Menu */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                mb: 2,
+                px: 1,
+              }}
+            >
+              <img
+                src='/capy.svg'
+                alt='Once Architect Logo'
+                style={{ height: '32px', width: '32px' }}
+              />
+              <Typography variant='h6' color='inherit' noWrap>
+                Once Architect
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
             <List>
               {mobileNavItems.map((item) => (
                 <ListItem key={item.text} disablePadding>

@@ -149,7 +149,7 @@ function HomePage({ onToggleTheme }) {
               <Typography
                 variant='h4'
                 component='h2'
-                sx={{ mt: 6, mb: 3, fontWeight: 600 }}
+                sx={{ mt: 10, mb: 3, fontWeight: 600 }}
               >
                 Gallery
               </Typography>
@@ -173,7 +173,7 @@ function HomePage({ onToggleTheme }) {
               <Typography
                 variant='h4'
                 component='h2'
-                sx={{ mt: 6, mb: 3, fontWeight: 600 }}
+                sx={{ mt: 10, mb: 3, fontWeight: 600 }}
               >
                 Events
               </Typography>

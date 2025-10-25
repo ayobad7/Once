@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles'; // Use ThemeProvider
 import { CssBaseline } from '@mui/material'; // Import CssBaseline
 import { darkTheme, lightTheme } from './theme'; // Import both themes
@@ -15,10 +15,44 @@ import FAQPage from './pages/FAQPage';
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true); // Start with dark mode
+  // Initialize theme based on user preference or system preference
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme !== null) {
+      return savedTheme === 'dark';
+    }
+    // Fall back to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Listen for system preference changes (when user hasn't manually set preference)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleChange = (e) => {
+      // Only update if user hasn't manually set a preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === null) {
+        setIsDarkMode(e.matches);
+      }
+    };
+
+    // Modern browsers
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode((prev) => {
+      const newMode = !prev;
+      // Save user's manual choice to localStorage
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+      return newMode;
+    });
   };
 
   // Select the theme based on the state

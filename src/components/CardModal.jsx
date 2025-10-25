@@ -11,6 +11,8 @@ import {
   IconButton,
   Chip,
   Stack,
+  Avatar,
+  AvatarGroup,
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -408,11 +410,43 @@ function CardModal({ open, onClose, item }) {
         )}
 
         {/* Author and Date */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-          <Typography variant='body2' color='text.secondary'>
-            By: {item.email ? item.email.split('@')[0] : 'Anonymous'}
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 3,
+            pt: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
+            {item.email ? (
+              <>
+                <AvatarGroup max={3}>
+                  <Avatar
+                    alt={item.email}
+                    src='/static/images/avatar/1.jpg'
+                    sx={{ width: 24, height: 24 }}
+                  />
+                </AvatarGroup>
+                <Typography variant='caption'>
+                  {item.email.split('@')[0]}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant='caption'>Anonymous</Typography>
+            )}
+          </Box>
+          <Typography variant='caption' color='text.secondary'>
             {formatDate(item.timestamp)}
           </Typography>
         </Box>
