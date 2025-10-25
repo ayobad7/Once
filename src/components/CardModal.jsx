@@ -17,6 +17,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { FaDiscord } from 'react-icons/fa6';
+import DescriptionWithLinks from './DescriptionWithLinks';
 
 // MUI theme-aware color mappings for chips
 const regionColors = {
@@ -249,7 +250,7 @@ function CardModal({ open, onClose, item }) {
 
         {/* Description */}
         <Typography variant='body1' color='text.primary' sx={{ mb: 3 }}>
-          {item.description}
+          <DescriptionWithLinks description={item.description} />
         </Typography>
 
         {/* Image Gallery */}

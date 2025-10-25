@@ -9,6 +9,8 @@ import AdminPage from './pages/AdminPage';
 import ShowcasePage from './pages/ShowcasePage';
 import GalleryPage from './pages/GalleryPage';
 import EventPage from './pages/EventPage';
+import AboutPage from './pages/AboutPage';
+import FAQPage from './pages/FAQPage';
 // DO NOT import BrowserRouter or Router here
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
@@ -43,6 +45,11 @@ function App() {
           path='/event'
           element={<EventPage onToggleTheme={toggleTheme} />}
         />
+        <Route
+          path='/about'
+          element={<AboutPage onToggleTheme={toggleTheme} />}
+        />
+        <Route path='/faq' element={<FAQPage onToggleTheme={toggleTheme} />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/admin' element={<AdminPage />} />
       </Routes>

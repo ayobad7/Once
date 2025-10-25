@@ -1,0 +1,27 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern architectural building icon -->
+  <rect x="8" y="16" width="8" height="20" fill="currentColor" opacity="0.8"/>
+  <rect x="16" y="10" width="8" height="26" fill="currentColor"/>
+  <rect x="24" y="14" width="8" height="22" fill="currentColor" opacity="0.6"/>
+  
+  <!-- Windows -->
+  <rect x="10" y="18" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="10" y="22" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="10" y="26" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="10" y="30" width="2" height="2" fill="white" opacity="0.5"/>
+  
+  <rect x="18" y="14" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="18" y="18" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="18" y="22" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="18" y="26" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="18" y="30" width="2" height="2" fill="white" opacity="0.5"/>
+  
+  <rect x="26" y="18" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="26" y="22" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="26" y="26" width="2" height="2" fill="white" opacity="0.5"/>
+  <rect x="26" y="30" width="2" height="2" fill="white" opacity="0.5"/>
+  
+  <!-- Base/Ground -->
+  <rect x="6" y="36" width="28" height="2" fill="currentColor" opacity="0.9"/>
+</svg>
+

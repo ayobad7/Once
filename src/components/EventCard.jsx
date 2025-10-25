@@ -14,6 +14,9 @@ import {
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { FaDiscord } from 'react-icons/fa6';
+import EventIcon from '@mui/icons-material/Event'; // Event icon
+import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
+import DescriptionWithLinks from './DescriptionWithLinks';
 
 // Color mappings for chips
 const regionColors = {
@@ -155,6 +158,14 @@ function EventCard({ item, onClick }) {
           {/* Builder Spotlight Chip - Positioned on top-left of image */}
           {item.spotlightDate && (
             <Chip
+              icon={
+                <MapsHomeWorkIcon
+                  sx={{
+                    fontSize: '0.85rem !important',
+                    color: 'inherit !important',
+                  }}
+                />
+              }
               label={`Builder Spotlight - ${
                 item.spotlightDate.toDate
                   ? item.spotlightDate.toDate().toLocaleDateString('en-US', {
@@ -174,6 +185,9 @@ function EventCard({ item, onClick }) {
                 height: '22px',
                 border: 'none',
                 boxShadow: 'none',
+                '& .MuiChip-icon': {
+                  marginLeft: '6px',
+                },
               }}
             />
           )}
@@ -183,8 +197,16 @@ function EventCard({ item, onClick }) {
       {/* Content Section - 60% width on desktop */}
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <StyledCardContent>
-          {/* Event Badge */}
+          {/* Event Badge with Icon */}
           <Chip
+            icon={
+              <EventIcon
+                sx={{
+                  fontSize: '0.85rem !important',
+                  color: 'inherit !important',
+                }}
+              />
+            }
             label='Event'
             size='small'
             color='warning'
@@ -192,10 +214,15 @@ function EventCard({ item, onClick }) {
             sx={{
               alignSelf: 'flex-start',
               fontWeight: 'bold',
+              fontSize: '0.65rem',
+              height: '22px',
               border: 'none',
               color: (theme) =>
                 theme.palette.mode === 'dark' ? '#000' : undefined,
               mb: 1,
+              '& .MuiChip-icon': {
+                marginLeft: '6px',
+              },
             }}
           />
 
@@ -302,7 +329,7 @@ function EventCard({ item, onClick }) {
           </Typography>
 
           <StyledTypography variant='body2' color='text.secondary' gutterBottom>
-            {item.description}
+            <DescriptionWithLinks description={item.description} />
           </StyledTypography>
         </StyledCardContent>
 

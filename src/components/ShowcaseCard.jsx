@@ -15,6 +15,11 @@ import {
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { FaDiscord } from 'react-icons/fa6';
+import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase icon
+import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
+import EventIcon from '@mui/icons-material/Event'; // Event icon
+import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
+import DescriptionWithLinks from './DescriptionWithLinks';
 
 // MUI theme-aware color mappings for chips
 const regionColors = {
@@ -188,6 +193,14 @@ function ShowcaseCard({ item, layout, onClick }) {
           {/* Builder Spotlight Chip - Positioned on top-left of image */}
           {item.spotlightDate && (
             <Chip
+              icon={
+                <MapsHomeWorkIcon
+                  sx={{
+                    fontSize: '0.85rem !important',
+                    color: 'inherit !important',
+                  }}
+                />
+              }
               label={`Builder Spotlight - ${
                 item.spotlightDate.toDate
                   ? item.spotlightDate.toDate().toLocaleDateString('en-US', {
@@ -207,14 +220,41 @@ function ShowcaseCard({ item, layout, onClick }) {
                 height: '22px',
                 border: 'none',
                 boxShadow: 'none',
+                '& .MuiChip-icon': {
+                  marginLeft: '6px',
+                },
               }}
             />
           )}
         </Box>
       )}
       <StyledCardContent>
-        {/* Card Type Pill */}
+        {/* Card Type Pill with Icon */}
         <Chip
+          icon={
+            item.cardType === 'showcase' ? (
+              <ViewCarouselIcon
+                sx={{
+                  fontSize: '0.85rem !important',
+                  color: 'inherit !important',
+                }}
+              />
+            ) : item.cardType === 'gallery' ? (
+              <CollectionsIcon
+                sx={{
+                  fontSize: '0.85rem !important',
+                  color: 'inherit !important',
+                }}
+              />
+            ) : (
+              <EventIcon
+                sx={{
+                  fontSize: '0.85rem !important',
+                  color: 'inherit !important',
+                }}
+              />
+            )
+          }
           label={
             item.cardType === 'showcase'
               ? 'Showcase'
@@ -235,11 +275,14 @@ function ShowcaseCard({ item, layout, onClick }) {
             alignSelf: 'flex-start',
             fontWeight: 'bold',
             fontSize: '0.65rem',
-            height: '20px',
+            height: '22px',
             border: 'none',
             color: (theme) =>
               theme.palette.mode === 'dark' ? '#000' : undefined,
             mb: 1,
+            '& .MuiChip-icon': {
+              marginLeft: '6px',
+            },
           }}
         />
 
@@ -344,7 +387,7 @@ function ShowcaseCard({ item, layout, onClick }) {
           {item.title}
         </Typography>
         <StyledTypography variant='body2' color='text.secondary' gutterBottom>
-          {item.description}
+          <DescriptionWithLinks description={item.description} />
         </StyledTypography>
       </StyledCardContent>
       <Author email={item.email} timestamp={item.timestamp} />

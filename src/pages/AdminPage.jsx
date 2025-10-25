@@ -1,5 +1,5 @@
 // src/pages/AdminPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -33,6 +33,11 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import HomeIcon from '@mui/icons-material/Home';
+import LinkIcon from '@mui/icons-material/Link'; // Link icon for adding links
+import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase icon
+import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
+import EventIcon from '@mui/icons-material/Event'; // Event icon
+import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
@@ -67,8 +72,16 @@ function AdminPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [filterType, setFilterType] = useState('all'); // 'all', 'showcase', 'gallery', 'event'
+
+  // Link modal states
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [linkText, setLinkText] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
+
   const navigate = useNavigate();
   const auth = getAuth();
+  const descriptionRef = useRef(null);
 
   // Chip options with MUI theme-aware colors
   const regionOptions = [
@@ -174,6 +187,47 @@ function AdminPage() {
           : [...currentArray, chipLabel],
       };
     });
+  };
+
+  // Link modal functions
+  const handleOpenLinkModal = () => {
+    // Save current cursor position
+    if (descriptionRef.current) {
+      const input = descriptionRef.current.querySelector('textarea');
+      if (input) {
+        setCursorPosition(input.selectionStart);
+      }
+    }
+    setLinkModalOpen(true);
+  };
+
+  const handleCloseLinkModal = () => {
+    setLinkModalOpen(false);
+    setLinkText('');
+    setLinkUrl('');
+  };
+
+  const handleInsertLink = () => {
+    if (!linkText || !linkUrl) {
+      return;
+    }
+
+    // Create markdown-style link
+    const markdownLink = `[${linkText}](${linkUrl})`;
+
+    // Insert at cursor position
+    const description = formData.description;
+    const newDescription =
+      description.slice(0, cursorPosition) +
+      markdownLink +
+      description.slice(cursorPosition);
+
+    setFormData((prev) => ({
+      ...prev,
+      description: newDescription,
+    }));
+
+    handleCloseLinkModal();
   };
 
   const handleSubmit = async (e) => {
@@ -458,17 +512,46 @@ function AdminPage() {
               margin='normal'
               required
             />
-            <TextField
-              fullWidth
-              label='Description'
-              name='description'
-              value={formData.description}
-              onChange={handleInputChange}
-              margin='normal'
-              multiline
-              rows={3}
-              required
-            />
+
+            {/* Description with Link Button */}
+            <Box sx={{ mt: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
+                <Typography variant='body2' color='text.secondary'>
+                  Description *
+                </Typography>
+                <IconButton
+                  size='small'
+                  onClick={handleOpenLinkModal}
+                  color='primary'
+                  title='Add Link'
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <LinkIcon fontSize='small' />
+                </IconButton>
+              </Box>
+              <TextField
+                fullWidth
+                name='description'
+                value={formData.description}
+                onChange={handleInputChange}
+                multiline
+                rows={3}
+                required
+                placeholder='Enter description... Use the link button above to add links.'
+                ref={descriptionRef}
+              />
+            </Box>
             <TextField
               fullWidth
               label='Main Image URL'
@@ -622,6 +705,7 @@ function AdminPage() {
               }}
             />
             <Chip
+              icon={<ViewCarouselIcon sx={{ fontSize: '0.9rem !important' }} />}
               label='Showcase'
               onClick={() => setFilterType('showcase')}
               variant={filterType === 'showcase' ? 'filled' : 'outlined'}
@@ -636,6 +720,7 @@ function AdminPage() {
               }}
             />
             <Chip
+              icon={<CollectionsIcon sx={{ fontSize: '0.9rem !important' }} />}
               label='Gallery'
               onClick={() => setFilterType('gallery')}
               variant={filterType === 'gallery' ? 'filled' : 'outlined'}
@@ -650,6 +735,7 @@ function AdminPage() {
               }}
             />
             <Chip
+              icon={<EventIcon sx={{ fontSize: '0.9rem !important' }} />}
               label='Event'
               onClick={() => setFilterType('event')}
               variant={filterType === 'event' ? 'filled' : 'outlined'}
@@ -688,8 +774,32 @@ function AdminPage() {
                   }}
                 >
                   <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-                    {/* Card Type Badge */}
+                    {/* Card Type Badge with Icon */}
                     <Chip
+                      icon={
+                        item.cardType === 'showcase' ? (
+                          <ViewCarouselIcon
+                            sx={{
+                              fontSize: '0.85rem !important',
+                              color: 'inherit !important',
+                            }}
+                          />
+                        ) : item.cardType === 'gallery' ? (
+                          <CollectionsIcon
+                            sx={{
+                              fontSize: '0.85rem !important',
+                              color: 'inherit !important',
+                            }}
+                          />
+                        ) : (
+                          <EventIcon
+                            sx={{
+                              fontSize: '0.85rem !important',
+                              color: 'inherit !important',
+                            }}
+                          />
+                        )
+                      }
                       label={
                         item.cardType === 'showcase'
                           ? 'Showcase'
@@ -708,11 +818,45 @@ function AdminPage() {
                       variant='filled'
                       sx={{
                         mb: 1.5,
+                        fontSize: '0.65rem',
+                        height: '22px',
                         border: 'none',
                         color: (theme) =>
                           theme.palette.mode === 'dark' ? '#000' : undefined,
+                        '& .MuiChip-icon': {
+                          marginLeft: '6px',
+                        },
                       }}
                     />
+
+                    {/* Builder Spotlight Badge (if spotlighted) - Permanent Medal */}
+                    {item.spotlightDate && (
+                      <Chip
+                        icon={
+                          <MapsHomeWorkIcon
+                            sx={{
+                              fontSize: '0.85rem !important',
+                              color: 'inherit !important',
+                            }}
+                          />
+                        }
+                        label='Builder Spotlight'
+                        size='small'
+                        color='warning'
+                        variant='filled'
+                        sx={{
+                          mb: 1.5,
+                          fontSize: '0.65rem',
+                          height: '22px',
+                          border: 'none',
+                          color: (theme) =>
+                            theme.palette.mode === 'dark' ? '#000' : undefined,
+                          '& .MuiChip-icon': {
+                            marginLeft: '6px',
+                          },
+                        }}
+                      />
+                    )}
 
                     {/* Title */}
                     <Typography
@@ -758,20 +902,23 @@ function AdminPage() {
                       p: 0.5,
                     }}
                   >
-                    <IconButton
-                      size='small'
-                      onClick={() =>
-                        handleToggleSpotlight(item.id, item.isSpotlight)
-                      }
-                      color={item.isSpotlight ? 'warning' : 'default'}
-                      title='Toggle Spotlight'
-                    >
-                      {item.isSpotlight ? (
-                        <StarIcon fontSize='small' />
-                      ) : (
-                        <StarBorderIcon fontSize='small' />
-                      )}
-                    </IconButton>
+                    {/* Star button only for showcase cards */}
+                    {item.cardType === 'showcase' && (
+                      <IconButton
+                        size='small'
+                        onClick={() =>
+                          handleToggleSpotlight(item.id, item.isSpotlight)
+                        }
+                        color={item.isSpotlight ? 'warning' : 'default'}
+                        title='Toggle Builder Spotlight'
+                      >
+                        {item.isSpotlight ? (
+                          <StarIcon fontSize='small' />
+                        ) : (
+                          <StarBorderIcon fontSize='small' />
+                        )}
+                      </IconButton>
+                    )}
                     <IconButton
                       size='small'
                       onClick={() => handleEdit(item)}
@@ -822,6 +969,49 @@ function AdminPage() {
           <Button onClick={cancelDelete}>Cancel</Button>
           <Button onClick={confirmDelete} color='error'>
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Link Modal */}
+      <Dialog
+        open={linkModalOpen}
+        onClose={handleCloseLinkModal}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle>Add Link</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label='Text'
+            value={linkText}
+            onChange={(e) => setLinkText(e.target.value)}
+            margin='normal'
+            placeholder='Enter the text to display'
+            autoFocus
+          />
+          <TextField
+            fullWidth
+            label='Link'
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            margin='normal'
+            placeholder='https://example.com'
+            required
+            helperText='Enter the full URL including https://'
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLinkModal} color='inherit'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleInsertLink}
+            variant='contained'
+            disabled={!linkText || !linkUrl}
+          >
+            Save
           </Button>
         </DialogActions>
       </Dialog>

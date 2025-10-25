@@ -1,6 +1,6 @@
 // src/components/Footer.jsx
 import React from 'react';
-import { Container, Typography, Link, Box } from '@mui/material';
+import { Container, Typography } from '@mui/material';
 
 function Footer() {
   return (
@@ -13,20 +13,9 @@ function Footer() {
         textAlign: 'center',
       }}
     >
-      <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-        © {new Date().getFullYear()} Sitemark. All rights reserved.
+      <Typography variant='body2' color='text.secondary'>
+        © {new Date().getFullYear()} Once Architect. All rights reserved.
       </Typography>
-      <Box>
-        <Link color='inherit' href='#' sx={{ px: 1 }}>
-          Privacy Policy
-        </Link>
-        <Link color='inherit' href='#' sx={{ px: 1 }}>
-          Terms of Service
-        </Link>
-        <Link color='inherit' href='#' sx={{ px: 1 }}>
-          Contact Us
-        </Link>
-      </Box>
     </Container>
   );
 }

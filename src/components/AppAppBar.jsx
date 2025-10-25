@@ -1,5 +1,5 @@
 // src/components/AppAppBar.jsx (Revised with Mobile Drawer)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -20,6 +20,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7'; // Light mode ico
 import MenuIcon from '@mui/icons-material/Menu'; // Hamburger icon
 import { Link } from 'react-router-dom'; // Import Link for routing
 import { useTheme } from '@mui/material/styles'; // Use useTheme hook to get current theme
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 function AppAppBar({ onToggleTheme }) {
   // Accept onToggleTheme prop
@@ -29,6 +30,17 @@ function AppAppBar({ onToggleTheme }) {
     disableHysteresis: true,
     threshold: 0,
   });
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const auth = getAuth();
+
+  // Check auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   // State for mobile drawer
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -56,8 +68,8 @@ function AppAppBar({ onToggleTheme }) {
     { text: 'Showcase', href: '/showcase' },
     { text: 'Gallery', href: '/gallery' },
     { text: 'Event', href: '/event' },
-    { text: 'About', href: '/' },
-    { text: 'FAQ', href: '/' },
+    { text: 'About', href: '/about' },
+    { text: 'FAQ', href: '/faq' },
   ];
 
   return (
@@ -92,14 +104,23 @@ function AppAppBar({ onToggleTheme }) {
           }}
         >
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <Typography
-              variant='h6'
-              color='inherit'
-              noWrap
-              sx={{ flexGrow: 1 }}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                flexGrow: 1,
+              }}
             >
-              Sitemark
-            </Typography>
+              <img
+                src='/capy.svg'
+                alt='Once Architect Logo'
+                style={{ height: '32px', width: '32px' }}
+              />
+              <Typography variant='h6' color='inherit' noWrap>
+                Once Architect
+              </Typography>
+            </Box>
             {/* Desktop Navigation Links - Hidden on mobile */}
             <Box
               sx={{
@@ -130,7 +151,7 @@ function AppAppBar({ onToggleTheme }) {
               alignItems: 'center',
             }}
           >
-            {/* Redirect Sign In to Admin */}
+            {/* Sign In / Post Button */}
             <Button
               variant='outlined'
               color='inherit'
@@ -143,7 +164,7 @@ function AppAppBar({ onToggleTheme }) {
                 mx: 1.5,
               }}
             >
-              Sign in
+              {isLoggedIn ? 'Post' : 'Sign in'}
             </Button>
             {/* Dark/Light Mode Toggle Button */}
             <Button
@@ -261,7 +282,7 @@ function AppAppBar({ onToggleTheme }) {
             </List>
             <Divider sx={{ my: 2 }} />
             <List>
-              {/* Sign In Link in Mobile Menu */}
+              {/* Sign In / Post Link in Mobile Menu */}
               <ListItem disablePadding>
                 <ListItemButton
                   component={Link}
@@ -271,7 +292,7 @@ function AppAppBar({ onToggleTheme }) {
                 >
                   {' '}
                   {/* Pill shape for list items */}
-                  <ListItemText primary='Sign in' />
+                  <ListItemText primary={isLoggedIn ? 'Post' : 'Sign in'} />
                 </ListItemButton>
               </ListItem>
               {/* Theme Toggle in Mobile Menu (Optional) */}
