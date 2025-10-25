@@ -29,11 +29,14 @@ const regionColors = {
 };
 
 const buildColors = {
-  Showcase: 'error',
+  'Base Design': 'error',
+  'Room Design': 'secondary',
   Tutorial: 'info',
-  Outfit: 'default',
+  Outfit: 'primary',
   Character: 'warning',
   Decoration: 'success',
+  Bug: 'error',
+  'Weapon Build': 'secondary',
 };
 
 function CardModal({ open, onClose, item }) {

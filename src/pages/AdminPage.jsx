@@ -10,9 +10,6 @@ import {
   CardContent,
   Box,
   Alert,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
   Dialog,
   DialogTitle,
@@ -34,7 +31,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import EditIcon from '@mui/icons-material/Edit';
+import HomeIcon from '@mui/icons-material/Home';
 import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db } from '../firebase'; // Adjust path if needed
 import {
@@ -54,7 +54,7 @@ function AdminPage() {
     description: '',
     imageUrl: '', // Main image URL
     additionalImages: [], // Array to store up to 8 additional image URLs
-    cardType: 'showcase', // New field: 'showcase' or 'information'
+    cardType: 'showcase', // New field: 'showcase' or 'gallery'
     regions: [], // Array of selected region chips
     builds: [], // Array of selected build chips
     youtubeLink: '', // YouTube video link
@@ -64,6 +64,9 @@ function AdminPage() {
   const [message, setMessage] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [filterType, setFilterType] = useState('all'); // 'all', 'showcase', 'gallery', 'event'
   const navigate = useNavigate();
   const auth = getAuth();
 
@@ -78,11 +81,14 @@ function AdminPage() {
   ];
 
   const buildOptions = [
-    { label: 'Showcase', color: 'error' },
+    { label: 'Base Design', color: 'error' },
+    { label: 'Room Design', color: 'secondary' },
     { label: 'Tutorial', color: 'info' },
-    { label: 'Outfit', color: 'default' },
+    { label: 'Outfit', color: 'primary' },
     { label: 'Character', color: 'warning' },
     { label: 'Decoration', color: 'success' },
+    { label: 'Bug', color: 'error' },
+    { label: 'Weapon Build', color: 'secondary' },
   ];
 
   // Check authentication state on component mount
@@ -182,8 +188,7 @@ function AdminPage() {
       const currentUser = auth.currentUser;
       const userEmail = currentUser?.email || '';
 
-      // Save gallery item data (including image URL) to Firestore
-      await addDoc(collection(db, 'galleryItems'), {
+      const itemData = {
         title: formData.title,
         description: formData.description,
         image: formData.imageUrl, // Main image URL
@@ -191,17 +196,31 @@ function AdminPage() {
         additionalImages: formData.additionalImages.filter(
           (img) => img.trim() !== ''
         ), // Filter out empty strings
-        timestamp: new Date(), // Add a timestamp
         cardType: formData.cardType, // Add the cardType field
         regions: formData.regions, // Add the regions chips
         builds: formData.builds, // Add the builds chips
         youtubeLink: formData.youtubeLink, // YouTube link
         discordLink: formData.discordLink, // Discord link
-        isSpotlight: false, // Default to not spotlight
-        spotlightDate: null, // Will be set when starred
-      });
+      };
 
-      setMessage('Gallery item added successfully!');
+      if (isEditing && editingId) {
+        // Update existing item
+        const itemRef = doc(db, 'galleryItems', editingId);
+        await updateDoc(itemRef, itemData);
+        setMessage('Gallery item updated successfully!');
+        setIsEditing(false);
+        setEditingId(null);
+      } else {
+        // Add new item
+        await addDoc(collection(db, 'galleryItems'), {
+          ...itemData,
+          timestamp: new Date(), // Add a timestamp for new items
+          isSpotlight: false, // Default to not spotlight
+          spotlightDate: null, // Will be set when starred
+        });
+        setMessage('Gallery item added successfully!');
+      }
+
       setFormData({
         title: '',
         description: '',
@@ -216,7 +235,11 @@ function AdminPage() {
       loadGalleryItems(); // Refresh the list
     } catch (error) {
       console.error('Error saving item to Firestore:', error);
-      setMessage('Failed to save gallery item');
+      setMessage(
+        isEditing
+          ? 'Failed to update gallery item'
+          : 'Failed to save gallery item'
+      );
     }
   };
 
@@ -258,6 +281,43 @@ function AdminPage() {
     }
   };
 
+  const handleEdit = (item) => {
+    // Populate form with existing item data
+    setFormData({
+      title: item.title || '',
+      description: item.description || '',
+      imageUrl: item.image || '',
+      additionalImages: item.additionalImages || [],
+      cardType: item.cardType || 'showcase',
+      regions: item.regions || [],
+      builds: item.builds || [],
+      youtubeLink: item.youtubeLink || '',
+      discordLink: item.discordLink || '',
+    });
+    setIsEditing(true);
+    setEditingId(item.id);
+    setMessage('');
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    setFormData({
+      title: '',
+      description: '',
+      imageUrl: '',
+      additionalImages: [],
+      cardType: 'showcase',
+      regions: [],
+      builds: [],
+      youtubeLink: '',
+      discordLink: '',
+    });
+    setMessage('');
+  };
+
   const handleToggleSpotlight = async (itemId, currentSpotlightStatus) => {
     try {
       // If we're setting this as spotlight, unset all others first
@@ -294,18 +354,38 @@ function AdminPage() {
   };
 
   return (
-    <Container maxWidth='md' sx={{ py: 4 }}>
-      <Typography variant='h4' component='h1' gutterBottom>
-        Admin Panel (Image URL)
-      </Typography>
-      <Button
-        onClick={handleLogout}
-        variant='outlined'
-        color='secondary'
-        size='small'
+    <Container maxWidth='lg' sx={{ py: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
       >
-        Logout
-      </Button>
+        <Typography variant='h4' component='h1'>
+          Admin Panel
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            onClick={() => navigate('/')}
+            variant='outlined'
+            color='primary'
+            size='small'
+            startIcon={<HomeIcon />}
+          >
+            Home
+          </Button>
+          <Button
+            onClick={handleLogout}
+            variant='outlined'
+            color='secondary'
+            size='small'
+          >
+            Logout
+          </Button>
+        </Box>
+      </Box>
 
       {message && (
         <Alert
@@ -318,9 +398,28 @@ function AdminPage() {
 
       <Card sx={{ mb: 4 }}>
         <CardContent>
-          <Typography variant='h6' gutterBottom>
-            Add New Gallery Item
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography variant='h6'>
+              {isEditing ? 'Edit Gallery Item' : 'Add New Gallery Item'}
+            </Typography>
+            {isEditing && (
+              <Button
+                onClick={handleCancelEdit}
+                variant='outlined'
+                size='small'
+                color='secondary'
+              >
+                Cancel Edit
+              </Button>
+            )}
+          </Box>
           <form onSubmit={handleSubmit}>
             {/* Card Type - Moved to top with Radio Group */}
             <FormControl component='fieldset' sx={{ mb: 3 }} fullWidth>
@@ -338,9 +437,14 @@ function AdminPage() {
                   label='Showcase'
                 />
                 <FormControlLabel
-                  value='information'
+                  value='gallery'
                   control={<Radio />}
-                  label='Information'
+                  label='Gallery'
+                />
+                <FormControlLabel
+                  value='event'
+                  control={<Radio />}
+                  label='Event'
                 />
               </RadioGroup>
             </FormControl>
@@ -479,67 +583,233 @@ function AdminPage() {
                 !formData.title || !formData.description || !formData.imageUrl
               }
             >
-              Add to Gallery
+              {isEditing ? 'Update Gallery Item' : 'Add to Gallery'}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent>
-          <Typography variant='h6' gutterBottom>
-            Existing Gallery Items ({galleryItems.length})
+      <Box>
+        {/* Header with Filter Pills */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3,
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
+          <Typography variant='h6'>
+            Existing Gallery Items (
+            {filterType === 'all'
+              ? galleryItems.length
+              : galleryItems.filter((item) => item.cardType === filterType)
+                  .length}
+            )
           </Typography>
-          <List>
-            {galleryItems.map((item) => (
-              <ListItem
-                key={item.id} // Use the Firestore document ID as the key
-                secondaryAction={
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+
+          {/* Filter Pills */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip
+              label='All'
+              onClick={() => setFilterType('all')}
+              variant={filterType === 'all' ? 'filled' : 'outlined'}
+              color='default'
+              sx={{
+                fontWeight: filterType === 'all' ? 'bold' : 'normal',
+              }}
+            />
+            <Chip
+              label='Showcase'
+              onClick={() => setFilterType('showcase')}
+              variant={filterType === 'showcase' ? 'filled' : 'outlined'}
+              color='error'
+              sx={{
+                fontWeight: filterType === 'showcase' ? 'bold' : 'normal',
+                ...(filterType === 'showcase' && {
+                  border: 'none',
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? '#000' : undefined,
+                }),
+              }}
+            />
+            <Chip
+              label='Gallery'
+              onClick={() => setFilterType('gallery')}
+              variant={filterType === 'gallery' ? 'filled' : 'outlined'}
+              color='info'
+              sx={{
+                fontWeight: filterType === 'gallery' ? 'bold' : 'normal',
+                ...(filterType === 'gallery' && {
+                  border: 'none',
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? '#000' : undefined,
+                }),
+              }}
+            />
+            <Chip
+              label='Event'
+              onClick={() => setFilterType('event')}
+              variant={filterType === 'event' ? 'filled' : 'outlined'}
+              color='warning'
+              sx={{
+                fontWeight: filterType === 'event' ? 'bold' : 'normal',
+                ...(filterType === 'event' && {
+                  border: 'none',
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? '#000' : undefined,
+                }),
+              }}
+            />
+          </Box>
+        </Box>
+
+        <Grid container spacing={2}>
+          {galleryItems
+            .filter((item) =>
+              filterType === 'all' ? true : item.cardType === filterType
+            )
+            .map((item) => (
+              <Grid item xs={12} sm={6} md={3} key={item.id}>
+                <Card
+                  variant='outlined'
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      boxShadow: 3,
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                    {/* Card Type Badge */}
+                    <Chip
+                      label={
+                        item.cardType === 'showcase'
+                          ? 'Showcase'
+                          : item.cardType === 'gallery'
+                          ? 'Gallery'
+                          : 'Event'
+                      }
+                      size='small'
+                      color={
+                        item.cardType === 'showcase'
+                          ? 'error'
+                          : item.cardType === 'gallery'
+                          ? 'info'
+                          : 'warning'
+                      }
+                      variant='filled'
+                      sx={{
+                        mb: 1.5,
+                        border: 'none',
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#000' : undefined,
+                      }}
+                    />
+
+                    {/* Title */}
+                    <Typography
+                      variant='subtitle1'
+                      component='h3'
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {item.title}
+                    </Typography>
+
+                    {/* Description Snippet */}
+                    <Typography
+                      variant='body2'
+                      color='text.secondary'
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        mb: 2,
+                      }}
+                    >
+                      {item.description || 'No description'}
+                    </Typography>
+                  </CardContent>
+
+                  {/* Action Buttons */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      borderTop: 1,
+                      borderColor: 'divider',
+                      p: 0.5,
+                    }}
+                  >
                     <IconButton
-                      aria-label='toggle spotlight'
+                      size='small'
                       onClick={() =>
                         handleToggleSpotlight(item.id, item.isSpotlight)
                       }
                       color={item.isSpotlight ? 'warning' : 'default'}
+                      title='Toggle Spotlight'
                     >
-                      {item.isSpotlight ? <StarIcon /> : <StarBorderIcon />}
+                      {item.isSpotlight ? (
+                        <StarIcon fontSize='small' />
+                      ) : (
+                        <StarBorderIcon fontSize='small' />
+                      )}
                     </IconButton>
                     <IconButton
-                      edge='end'
-                      aria-label='delete'
-                      onClick={() => handleDeleteClick(item.id)} // Pass the Firestore document ID
+                      size='small'
+                      onClick={() => handleEdit(item)}
+                      color='primary'
+                      title='Edit'
                     >
-                      <DeleteIcon />
+                      <EditIcon fontSize='small' />
+                    </IconButton>
+                    <IconButton
+                      size='small'
+                      onClick={() => handleDeleteClick(item.id)}
+                      color='error'
+                      title='Delete'
+                    >
+                      <DeleteIcon fontSize='small' />
                     </IconButton>
                   </Box>
-                }
-              >
-                <ListItemText
-                  primary={item.title}
-                  secondary={
-                    <>
-                      <Typography
-                        component='span'
-                        variant='body2'
-                        color='text.primary'
-                      >
-                        {item.cardType === 'showcase'
-                          ? 'Showcase'
-                          : 'Information'}
-                      </Typography>
-                      {' — '}
-                      {item.description
-                        ? item.description.substring(0, 50) + '...'
-                        : 'No description'}
-                    </>
-                  }
-                />
-              </ListItem>
+                </Card>
+              </Grid>
             ))}
-          </List>
-        </CardContent>
-      </Card>
+        </Grid>
+
+        {/* Empty State */}
+        {galleryItems.filter((item) =>
+          filterType === 'all' ? true : item.cardType === filterType
+        ).length === 0 && (
+          <Typography
+            variant='body1'
+            align='center'
+            color='text.secondary'
+            sx={{ mt: 4 }}
+          >
+            {filterType === 'all'
+              ? 'No items yet. Create your first item above!'
+              : `No ${filterType} items found.`}
+          </Typography>
+        )}
+      </Box>
 
       <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>

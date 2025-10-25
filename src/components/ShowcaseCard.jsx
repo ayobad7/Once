@@ -27,11 +27,14 @@ const regionColors = {
 };
 
 const buildColors = {
-  Showcase: 'error',
+  'Base Design': 'error',
+  'Room Design': 'secondary',
   Tutorial: 'info',
-  Outfit: 'default',
+  Outfit: 'primary',
   Character: 'warning',
   Decoration: 'success',
+  Bug: 'error',
+  'Weapon Build': 'secondary',
 };
 
 // Styled Card matching MUI template
@@ -140,7 +143,7 @@ function ShowcaseCard({ item, layout, onClick }) {
           borderBottom: '1px solid',
           borderColor: 'divider',
         };
-      case 'information':
+      case 'gallery':
         return {
           height: { sm: 'auto', md: '50%' },
           aspectRatio: { sm: '16 / 9', md: '' },
@@ -165,7 +168,7 @@ function ShowcaseCard({ item, layout, onClick }) {
         <Box
           sx={{
             position: 'relative',
-            ...(layout === 'information' && {
+            ...(layout === 'gallery' && {
               height: { sm: 'auto', md: '50%' },
             }),
           }}
@@ -176,7 +179,7 @@ function ShowcaseCard({ item, layout, onClick }) {
             image={item.image}
             sx={{
               ...getImageStyle(),
-              ...(layout === 'information' && {
+              ...(layout === 'gallery' && {
                 height: '100%',
                 objectFit: 'cover',
               }),
@@ -210,7 +213,37 @@ function ShowcaseCard({ item, layout, onClick }) {
         </Box>
       )}
       <StyledCardContent>
-        {/* Display Chips and Social Icons */}
+        {/* Card Type Pill */}
+        <Chip
+          label={
+            item.cardType === 'showcase'
+              ? 'Showcase'
+              : item.cardType === 'gallery'
+              ? 'Gallery'
+              : 'Event'
+          }
+          size='small'
+          color={
+            item.cardType === 'showcase'
+              ? 'error'
+              : item.cardType === 'gallery'
+              ? 'info'
+              : 'warning'
+          }
+          variant='filled'
+          sx={{
+            alignSelf: 'flex-start',
+            fontWeight: 'bold',
+            fontSize: '0.65rem',
+            height: '20px',
+            border: 'none',
+            color: (theme) =>
+              theme.palette.mode === 'dark' ? '#000' : undefined,
+            mb: 1,
+          }}
+        />
+
+        {/* Display Region/Build Chips and Social Icons */}
         <Box
           sx={{
             display: 'flex',

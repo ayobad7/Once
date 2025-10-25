@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx - Fixed Layout with Spotlight, Showcase, and Information cards
+// src/pages/HomePage.jsx - Fixed Layout with Spotlight, Showcase, and Gallery cards
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -14,12 +14,14 @@ import AppAppBar from '../components/AppAppBar';
 import MainContent from '../components/MainContent';
 import Footer from '../components/Footer';
 import ShowcaseCard from '../components/ShowcaseCard';
+import EventCard from '../components/EventCard';
 import CardModal from '../components/CardModal';
 
 function HomePage({ onToggleTheme }) {
   const [spotlightCard, setSpotlightCard] = useState(null);
   const [showcaseCards, setShowcaseCards] = useState([]);
-  const [informationCards, setInformationCards] = useState([]);
+  const [galleryCards, setGalleryCards] = useState([]);
+  const [eventCards, setEventCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -53,11 +55,17 @@ function HomePage({ onToggleTheme }) {
           .slice(0, 2);
         setShowcaseCards(showcases);
 
-        // Get latest 3 information cards (excluding spotlight)
-        const information = nonSpotlightItems
-          .filter((item) => item.cardType === 'information')
+        // Get latest 3 gallery cards (excluding spotlight)
+        const gallery = nonSpotlightItems
+          .filter((item) => item.cardType === 'gallery')
           .slice(0, 3);
-        setInformationCards(information);
+        setGalleryCards(gallery);
+
+        // Get latest 2 event cards (excluding spotlight)
+        const events = nonSpotlightItems
+          .filter((item) => item.cardType === 'event')
+          .slice(0, 2);
+        setEventCards(events);
 
         setError(null);
       } catch (err) {
@@ -133,22 +141,59 @@ function HomePage({ onToggleTheme }) {
                 />
               </Grid>
             ))}
-
-            {/* Information Cards - 3 cards at 33.33% width each (4 cols each in 12-col grid) */}
-            {informationCards.map((item) => (
-              <Grid item xs={12} md={4} key={item.id}>
-                <ShowcaseCard
-                  item={item}
-                  layout='information'
-                  onClick={() => handleCardClick(item)}
-                />
-              </Grid>
-            ))}
           </Grid>
+
+          {/* Gallery Section */}
+          {galleryCards.length > 0 && (
+            <>
+              <Typography
+                variant='h4'
+                component='h2'
+                sx={{ mt: 6, mb: 3, fontWeight: 600 }}
+              >
+                Gallery
+              </Typography>
+              <Grid container spacing={2}>
+                {galleryCards.map((item) => (
+                  <Grid item xs={12} md={4} key={item.id}>
+                    <ShowcaseCard
+                      item={item}
+                      layout='gallery'
+                      onClick={() => handleCardClick(item)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
+
+          {/* Events Section */}
+          {eventCards.length > 0 && (
+            <>
+              <Typography
+                variant='h4'
+                component='h2'
+                sx={{ mt: 6, mb: 3, fontWeight: 600 }}
+              >
+                Events
+              </Typography>
+              <Grid container spacing={2}>
+                {eventCards.map((item) => (
+                  <Grid item xs={12} key={item.id}>
+                    <EventCard
+                      item={item}
+                      onClick={() => handleCardClick(item)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
 
           {!spotlightCard &&
             showcaseCards.length === 0 &&
-            informationCards.length === 0 && (
+            galleryCards.length === 0 &&
+            eventCards.length === 0 && (
               <Typography variant='body1' align='center' sx={{ mt: 4 }}>
                 No items to display yet.
               </Typography>

@@ -54,10 +54,10 @@ function AppAppBar({ onToggleTheme }) {
   const mobileNavItems = [
     { text: 'Features', href: '/' },
     { text: 'Showcase', href: '/showcase' },
-    { text: 'Information', href: '/information' },
-    { text: 'Pricing', href: '/' },
+    { text: 'Gallery', href: '/gallery' },
+    { text: 'Event', href: '/event' },
+    { text: 'About', href: '/' },
     { text: 'FAQ', href: '/' },
-    { text: 'Blog', href: '/' },
   ];
 
   return (
@@ -87,8 +87,8 @@ function AppAppBar({ onToggleTheme }) {
             backgroundColor: appBarBgColor,
             boxShadow: appBarShadow,
             // Responsive margins
-            ml: { xs: '32px', sm: '50px', md: '50px' },
-            mr: { xs: '33px', sm: '50px', md: '50px' },
+            ml: { xs: '33px', sm: '48px', md: '48px' },
+            mr: { xs: '33px', sm: '48px', md: '48px' },
           }}
         >
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>

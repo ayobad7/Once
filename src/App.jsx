@@ -7,7 +7,8 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import ShowcasePage from './pages/ShowcasePage';
-import InformationPage from './pages/InformationPage';
+import GalleryPage from './pages/GalleryPage';
+import EventPage from './pages/EventPage';
 // DO NOT import BrowserRouter or Router here
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
@@ -35,8 +36,12 @@ function App() {
           element={<ShowcasePage onToggleTheme={toggleTheme} />}
         />
         <Route
-          path='/information'
-          element={<InformationPage onToggleTheme={toggleTheme} />}
+          path='/gallery'
+          element={<GalleryPage onToggleTheme={toggleTheme} />}
+        />
+        <Route
+          path='/event'
+          element={<EventPage onToggleTheme={toggleTheme} />}
         />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/admin' element={<AdminPage />} />
