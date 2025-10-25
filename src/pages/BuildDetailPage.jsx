@@ -287,13 +287,23 @@ function BuildDetailPage({ onToggleTheme }) {
                 />
               )}
 
-              {/* Region & Build Chips */}
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+              {/* Region & Build Chips with Social Icons */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                  mb: 2,
+                }}
+              >
+                {/* Left side: Region & Build Chips */}
                 <Stack
                   direction='row'
                   spacing={0.5}
                   flexWrap='wrap'
-                  sx={{ gap: 0.5 }}
+                  sx={{ gap: 0.5, flex: 1 }}
                 >
                   {build.regions &&
                     build.regions.map((region) => (
@@ -331,7 +341,7 @@ function BuildDetailPage({ onToggleTheme }) {
                     ))}
                 </Stack>
 
-                {/* Social Icons */}
+                {/* Right side: Social Icons */}
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   {build.youtubeLink && (
                     <IconButton
