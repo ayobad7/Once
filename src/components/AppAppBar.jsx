@@ -105,11 +105,19 @@ function AppAppBar({ onToggleTheme }) {
         >
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
             <Box
+              component={Link}
+              to='/'
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
                 flexGrow: 1,
+                textDecoration: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
               }}
             >
               <img
@@ -263,12 +271,21 @@ function AppAppBar({ onToggleTheme }) {
           >
             {/* Logo and Title in Mobile Menu */}
             <Box
+              component={Link}
+              to='/'
+              onClick={handleDrawerToggle}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
                 mb: 2,
                 px: 1,
+                textDecoration: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
               }}
             >
               <img
