@@ -1,13 +1,28 @@
 // src/components/AppAppBar.jsx (Revised with Mobile Drawer)
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, useScrollTrigger, Container, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  useScrollTrigger,
+  Container,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4'; // Dark mode icon
 import Brightness7Icon from '@mui/icons-material/Brightness7'; // Light mode icon
 import MenuIcon from '@mui/icons-material/Menu'; // Hamburger icon
 import { Link } from 'react-router-dom'; // Import Link for routing
 import { useTheme } from '@mui/material/styles'; // Use useTheme hook to get current theme
 
-function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
+function AppAppBar({ onToggleTheme }) {
+  // Accept onToggleTheme prop
   const theme = useTheme(); // Use useTheme hook to get current theme object
   const currentMode = theme.palette.mode; // Get the current mode from the theme
   const trigger = useScrollTrigger({
@@ -23,26 +38,26 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
   };
 
   // Define semi-transparent colors for light and dark modes
-  const appBarBgColor = currentMode === 'dark'
-    ? `rgba(${theme.palette.background.defaultChannel || '30, 30, 30'}, 0.4)`
-    : `rgba(${theme.palette.background.defaultChannel || '255, 255, 255'}, 0.4)`;
+  const appBarBgColor =
+    currentMode === 'dark'
+      ? `rgba(${theme.palette.background.defaultChannel || '30, 30, 30'}, 0.4)`
+      : `rgba(${
+          theme.palette.background.defaultChannel || '255, 255, 255'
+        }, 0.4)`;
 
-  const appBarBorderColor = currentMode === 'dark'
-    ? theme.palette.divider
-    : theme.palette.divider;
+  const appBarBorderColor =
+    currentMode === 'dark' ? theme.palette.divider : theme.palette.divider;
 
-  const appBarShadow = trigger
-    ? (theme.vars || theme).shadows[1]
-    : 'none';
+  const appBarShadow = trigger ? (theme.vars || theme).shadows[1] : 'none';
 
   // Mobile Navigation Items
   const mobileNavItems = [
-    { text: 'Features', href: '#' },
-    { text: 'Testimonials', href: '#' },
-    { text: 'Highlights', href: '#' },
-    { text: 'Pricing', href: '#' },
-    { text: 'FAQ', href: '#' },
-    { text: 'Blog', href: '#' },
+    { text: 'Features', href: '/' },
+    { text: 'Showcase', href: '/showcase' },
+    { text: 'Information', href: '/information' },
+    { text: 'Pricing', href: '/' },
+    { text: 'FAQ', href: '/' },
+    { text: 'Blog', href: '/' },
   ];
 
   return (
@@ -99,7 +114,8 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
                   variant='text'
                   color='inherit'
                   size='small'
-                  href={item.href}
+                  component={Link}
+                  to={item.href}
                   sx={{ borderRadius: '20px' }} // Pill shape for buttons
                 >
                   {item.text}
@@ -231,8 +247,8 @@ function AppAppBar({ onToggleTheme }) { // Accept onToggleTheme prop
               {mobileNavItems.map((item) => (
                 <ListItem key={item.text} disablePadding>
                   <ListItemButton
-                    component='a'
-                    href={item.href}
+                    component={Link}
+                    to={item.href}
                     onClick={handleDrawerToggle}
                     sx={{ borderRadius: '20px', mx: 1 }}
                   >

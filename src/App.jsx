@@ -6,6 +6,8 @@ import { darkTheme, lightTheme } from './theme'; // Import both themes
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
+import ShowcasePage from './pages/ShowcasePage';
+import InformationPage from './pages/InformationPage';
 // DO NOT import BrowserRouter or Router here
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
@@ -28,6 +30,14 @@ function App() {
       {/* Define the routes here, within the ThemeProvider */}
       <Routes>
         <Route path='/' element={<HomePage onToggleTheme={toggleTheme} />} />
+        <Route
+          path='/showcase'
+          element={<ShowcasePage onToggleTheme={toggleTheme} />}
+        />
+        <Route
+          path='/information'
+          element={<InformationPage onToggleTheme={toggleTheme} />}
+        />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/admin' element={<AdminPage />} />
       </Routes>

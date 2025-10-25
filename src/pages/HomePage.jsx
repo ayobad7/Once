@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx
+// src/pages/HomePage.jsx - Fixed Layout with Spotlight, Showcase, and Information cards
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -6,30 +6,30 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Box,
 } from '@mui/material';
-import { db } from '../firebase'; // Adjust path if needed
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'; // Import orderBy and query
-// --- Add the import for AppAppBar ---
-import AppAppBar from '../components/AppAppBar'; // Adjust the path if AppAppBar is in a different location
-// --- Add the import for MainContent and Footer ---
-import MainContent from '../components/MainContent'; // Adjust the path
-import Footer from '../components/Footer'; // Adjust the path
-// --- Add the import for ShowcaseCard and TutorialCard ---
-import ShowcaseCard from '../components/ShowcaseCard'; // Adjust the path
-import TutorialCard from '../components/TutorialCard'; // Adjust the path
+import { db } from '../firebase';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import AppAppBar from '../components/AppAppBar';
+import MainContent from '../components/MainContent';
+import Footer from '../components/Footer';
+import ShowcaseCard from '../components/ShowcaseCard';
+import CardModal from '../components/CardModal';
 
 function HomePage({ onToggleTheme }) {
-  // Accept onToggleTheme prop
-  const [galleryItems, setGalleryItems] = useState([]);
+  const [spotlightCard, setSpotlightCard] = useState(null);
+  const [showcaseCards, setShowcaseCards] = useState([]);
+  const [informationCards, setInformationCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch gallery items on component mount
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
         setLoading(true);
-        // Optional: Order by timestamp for consistent display
         const q = query(
           collection(db, 'galleryItems'),
           orderBy('timestamp', 'desc')
@@ -39,7 +39,26 @@ function HomePage({ onToggleTheme }) {
           id: doc.id,
           ...doc.data(),
         }));
-        setGalleryItems(items);
+
+        // Find spotlight card (only one can be starred)
+        const spotlight = items.find((item) => item.isSpotlight);
+        setSpotlightCard(spotlight || null);
+
+        // Filter out spotlight card from the rest
+        const nonSpotlightItems = items.filter((item) => !item.isSpotlight);
+
+        // Get latest 2 showcase cards (excluding spotlight)
+        const showcases = nonSpotlightItems
+          .filter((item) => item.cardType === 'showcase')
+          .slice(0, 2);
+        setShowcaseCards(showcases);
+
+        // Get latest 3 information cards (excluding spotlight)
+        const information = nonSpotlightItems
+          .filter((item) => item.cardType === 'information')
+          .slice(0, 3);
+        setInformationCards(information);
+
         setError(null);
       } catch (err) {
         console.error('Error fetching gallery items:', err);
@@ -50,6 +69,18 @@ function HomePage({ onToggleTheme }) {
     };
     fetchGalleryItems();
   }, []);
+
+  // Function to handle card click
+  const handleCardClick = (item) => {
+    setSelectedItem(item);
+    setModalOpen(true);
+  };
+
+  // Function to close the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedItem(null);
+  };
 
   if (loading) {
     return (
@@ -67,69 +98,71 @@ function HomePage({ onToggleTheme }) {
     );
   }
 
-  // Separate items by type for layout arrangement
-  const showcaseItems = galleryItems.filter(
-    (item) => item.itemType === 'showcase'
-  );
-  const tutorialItems = galleryItems.filter(
-    (item) => item.itemType === 'tutorial'
-  );
-
   return (
     <>
-      <AppAppBar onToggleTheme={onToggleTheme} />{' '}
-      {/* Pass onToggleTheme to AppAppBar */}
+      <AppAppBar onToggleTheme={onToggleTheme} />
       <MainContent>
-        {/* Match the Container's sx props from AppAppBar.jsx */}
-        <Container maxWidth='lg' sx={{ py: 9, px: 2 }}>
-          <Typography variant='h2' component='h1' gutterBottom align='center'>
-            We Build Stuff
+        <Container maxWidth='lg' sx={{ pt: 12, pb: 4 }}>
+          <Typography variant='h1' component='h1' gutterBottom>
+            Blog
           </Typography>
-          <Typography variant='h6' component='h2' gutterBottom align='center'>
-            Even though things always broken
+          <Typography variant='body1' gutterBottom sx={{ mb: 4 }}>
+            Stay in the loop with the latest about our products
           </Typography>
 
-          {/* Showcase Items - 2 per row */}
-          {showcaseItems.length > 0 && (
-            <>
-              <Grid container spacing={2} justifyContent='center'>
-                {showcaseItems.map((item) => (
-                  <Grid item xs={12} sm={6} key={item.id}>
-                    {' '}
-                    {/* xs=12, sm=6 means 1 per row on mobile, 2 per row on small screens and up */}
-                    <ShowcaseCard item={item} />
-                  </Grid>
-                ))}
+          {/* Fixed Layout: Spotlight + Showcase + Information */}
+          <Grid container spacing={2}>
+            {/* Spotlight Card - Full Width */}
+            {spotlightCard && (
+              <Grid item xs={12}>
+                <ShowcaseCard
+                  item={spotlightCard}
+                  layout='spotlight'
+                  onClick={() => handleCardClick(spotlightCard)}
+                />
               </Grid>
-            </>
-          )}
+            )}
 
-          {/* Tutorial Items - 3 per row */}
-          {tutorialItems.length > 0 && (
-            <>
-              <Typography
-                variant='h4'
-                component='h2'
-                gutterBottom
-                sx={{ mt: 4 }}
-                align='center'
-              >
-                Latest Posts
+            {/* Showcase Cards - 2 cards at 50% width each (6 cols each in 12-col grid) */}
+            {showcaseCards.map((item) => (
+              <Grid item xs={12} md={6} key={item.id}>
+                <ShowcaseCard
+                  item={item}
+                  layout='showcase'
+                  onClick={() => handleCardClick(item)}
+                />
+              </Grid>
+            ))}
+
+            {/* Information Cards - 3 cards at 33.33% width each (4 cols each in 12-col grid) */}
+            {informationCards.map((item) => (
+              <Grid item xs={12} md={4} key={item.id}>
+                <ShowcaseCard
+                  item={item}
+                  layout='information'
+                  onClick={() => handleCardClick(item)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {!spotlightCard &&
+            showcaseCards.length === 0 &&
+            informationCards.length === 0 && (
+              <Typography variant='body1' align='center' sx={{ mt: 4 }}>
+                No items to display yet.
               </Typography>
-              <Grid container spacing={2} justifyContent='center'>
-                {tutorialItems.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item.id}>
-                    {' '}
-                    {/* xs=12, sm=6, md=4 means 1 per row on mobile, 2 on small, 3 on medium screens and up */}
-                    <TutorialCard item={item} />
-                  </Grid>
-                ))}
-              </Grid>
-            </>
-          )}
+            )}
         </Container>
       </MainContent>
       <Footer />
+
+      {/* Render the Modal */}
+      <CardModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        item={selectedItem}
+      />
     </>
   );
 }

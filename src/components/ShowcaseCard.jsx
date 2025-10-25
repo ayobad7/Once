@@ -1,121 +1,163 @@
-// src/components/ShowcaseCard.jsx
+// src/components/ShowcaseCard.jsx - Styled to match MUI Blog Template
 import React from 'react';
 import {
   Card,
   CardMedia,
   CardContent,
-  CardActions,
   Typography,
-  Button,
   Box,
   Avatar,
-  Chip,
-  ImageList,
-  ImageListItem,
+  AvatarGroup,
 } from '@mui/material';
-import { styled } from '@mui/material/styles'; // Import styled
+import { styled } from '@mui/material/styles';
 
-// Use styled components like the template
+// Styled Card matching MUI template
 const StyledCard = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  height: '100%', // Ensure full height
-  // Use outlined variant styling
-  border: '1px solid',
-  borderColor: (theme.vars || theme).palette.divider, // Use theme divider color
-  backgroundColor: (theme.vars || theme).palette.background.paper, // Use theme paper color
+  padding: 0,
+  height: '100%',
+  backgroundColor: (theme.vars || theme).palette.background.paper,
   '&:hover': {
-    // Optional: Add a subtle hover effect
-    backgroundColor: (theme.vars || theme).palette.action.hover,
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
   },
-  borderRadius: theme.shape.borderRadius, // Use theme border radius
+  '&:focus-visible': {
+    outline: '3px solid',
+    outlineColor: 'hsla(210, 98%, 48%, 0.5)',
+    outlineOffset: '2px',
+  },
 }));
 
+// Styled Content matching MUI template
 const StyledCardContent = styled(CardContent)({
-  flexGrow: 1, // Ensure content takes available space
-  padding: 16, // Match template padding
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 4,
+  padding: 16,
+  flexGrow: 1,
   '&:last-child': {
-    paddingBottom: 16, // Match template padding
+    paddingBottom: 16,
   },
 });
 
-function ShowcaseCard({ item }) {
+// Typography with 2-line clamp for description
+const StyledTypography = styled(Typography)({
+  display: '-webkit-box',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 2,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+});
+
+// Author section component
+function Author({ email, timestamp }) {
+  const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return 'Unknown Date';
+    const date = timestamp.toDate();
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   return (
-    <StyledCard variant='outlined'>
-      {' '}
-      {/* Use outlined variant */}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 2,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '16px',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1,
+          alignItems: 'center',
+        }}
+      >
+        {email ? (
+          <>
+            <AvatarGroup max={3}>
+              <Avatar
+                alt={email}
+                src='/static/images/avatar/1.jpg'
+                sx={{ width: 24, height: 24 }}
+              />
+            </AvatarGroup>
+            <Typography variant='caption'>{email.split('@')[0]}</Typography>
+          </>
+        ) : (
+          <Typography variant='caption'>Anonymous</Typography>
+        )}
+      </Box>
+      <Typography variant='caption'>{formatDate(timestamp)}</Typography>
+    </Box>
+  );
+}
+
+function ShowcaseCard({ item, layout, onClick }) {
+  // Determine image aspect ratio and height based on layout
+  const getImageStyle = () => {
+    switch (layout) {
+      case 'spotlight':
+        return {
+          aspectRatio: '16 / 9',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        };
+      case 'showcase':
+        return {
+          aspectRatio: '16 / 9',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        };
+      case 'information':
+        return {
+          height: { sm: 'auto', md: '50%' },
+          aspectRatio: { sm: '16 / 9', md: '' },
+        };
+      default:
+        return {
+          aspectRatio: '16 / 9',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        };
+    }
+  };
+
+  return (
+    <StyledCard
+      variant='outlined'
+      onClick={onClick}
+      tabIndex={0}
+      sx={{ height: '100%' }}
+    >
       {item.image && (
         <CardMedia
           component='img'
-          height='250' // Adjust height as needed
-          image={item.image} // Use 'image' field from Firebase
           alt={item.title}
-          sx={{
-            borderBottom: '1px solid', // Add border below image like template
-            borderColor: (theme) => (theme.vars || theme).palette.divider,
-          }}
+          image={item.image}
+          sx={getImageStyle()}
         />
       )}
       <StyledCardContent>
-        {' '}
-        {/* Use styled CardContent */}
-        <Typography variant='caption' color='text.secondary' gutterBottom>
-          {item.category || 'Category'} {/* Display category field */}
+        <Typography gutterBottom variant='caption' component='div'>
+          {item.category || 'Uncategorized'}
         </Typography>
-        <Typography gutterBottom variant='h5' component='h2'>
+        <Typography gutterBottom variant='h6' component='div'>
           {item.title}
         </Typography>
-        <Typography variant='body2' color='text.secondary'>
+        <StyledTypography variant='body2' color='text.secondary' gutterBottom>
           {item.description}
-        </Typography>
-        {/* Display additional images below the description */}
-        {item.additionalImages && item.additionalImages.length > 0 && (
-          <>
-            <Typography
-              variant='subtitle2'
-              color='text.secondary'
-              sx={{ mt: 2 }}
-            >
-              Additional Images:
-            </Typography>
-            <ImageList cols={2} gap={8} sx={{ mt: 1 }}>
-              {item.additionalImages.map((imgUrl, index) => (
-                <ImageListItem key={`${item.id}-add-${index}`}>
-                  <img
-                    src={imgUrl}
-                    alt={`Additional ${index + 1}`}
-                    style={{
-                      objectFit: 'cover',
-                      width: '100%',
-                      height: '100%',
-                    }} // Crop and scale
-                    loading='lazy'
-                  />
-                </ImageListItem>
-              ))}
-            </ImageList>
-          </>
-        )}
+        </StyledTypography>
       </StyledCardContent>
-      <CardActions sx={{ justifyContent: 'space-between', padding: '16px' }}>
-        {' '}
-        {/* Match template padding */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {item.email && (
-            <Avatar sx={{ bgcolor: '#ccc', mr: 1 }} aria-label='author'>
-              {item.email.charAt(0).toUpperCase()}
-            </Avatar>
-          )}
-          <Typography variant='caption' color='text.secondary'>
-            {item.email ? item.email.split('@')[0] : 'Anonymous'}
-          </Typography>
-        </Box>
-        <Typography variant='caption' color='text.secondary'>
-          {item.timestamp
-            ? item.timestamp.toDate().toLocaleString()
-            : 'Unknown Date'}
-        </Typography>
-      </CardActions>
+      <Author email={item.email} timestamp={item.timestamp} />
     </StyledCard>
   );
 }

@@ -26,8 +26,12 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Select, // Add this import
+  MenuItem, // Add this import if you use dropdown options
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db } from '../firebase'; // Adjust path if needed
 import {
@@ -36,6 +40,9 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  updateDoc,
+  query,
+  where,
 } from 'firebase/firestore';
 
 function AdminPage() {
@@ -45,7 +52,7 @@ function AdminPage() {
     imageUrl: '', // Main image URL
     email: '', // Optional: User's email for avatar
     additionalImages: [], // Array to store up to 8 additional image URLs
-    itemType: 'showcase', // Default to showcase
+    cardType: 'showcase', // New field: 'showcase' or 'information'
     category: '', // New field for category
   });
   const [galleryItems, setGalleryItems] = useState([]);
@@ -62,8 +69,24 @@ function AdminPage() {
         // User is not logged in, redirect to login
         navigate('/login');
       } else {
-        // User is logged in, load gallery items
-        loadGalleryItems();
+        // ✅ AUTHORIZATION: Restrict access to specific users
+        const allowedEmails = [
+          'ayobad7@gmail.com', // Add your allowed email addresses here
+          'potato@once.com',
+          // 'admin@yourdomain.com',
+        ];
+
+        if (!allowedEmails.includes(user.email)) {
+          // User is not authorized
+          setMessage(
+            'Access denied. You are not authorized to access this page.'
+          );
+          signOut(auth); // Sign them out
+          setTimeout(() => navigate('/login'), 2000); // Redirect after 2 seconds
+        } else {
+          // User is authorized, load gallery items
+          loadGalleryItems();
+        }
       }
     });
 
@@ -103,10 +126,10 @@ function AdminPage() {
     }));
   };
 
-  const handleItemTypeChange = (e) => {
+  const handleCardTypeChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      itemType: e.target.value,
+      cardType: e.target.value,
     }));
   };
 
@@ -128,8 +151,9 @@ function AdminPage() {
           (img) => img.trim() !== ''
         ), // Filter out empty strings
         timestamp: new Date(), // Add a timestamp
-        itemType: formData.itemType, // Add the itemType field
+        cardType: formData.cardType, // Add the cardType field
         category: formData.category, // Add the category field
+        isSpotlight: false, // Default to not spotlight
       });
 
       setMessage('Gallery item added successfully!');
@@ -139,7 +163,7 @@ function AdminPage() {
         imageUrl: '',
         email: '',
         additionalImages: [],
-        itemType: 'showcase', // Reset to default
+        cardType: 'showcase', // Reset to default
         category: '', // Reset category field
       }); // Reset form
       loadGalleryItems(); // Refresh the list
@@ -184,6 +208,34 @@ function AdminPage() {
     } catch (error) {
       console.error('Logout error:', error);
       setMessage('Logout failed');
+    }
+  };
+
+  const handleToggleSpotlight = async (itemId, currentSpotlightStatus) => {
+    try {
+      // If we're setting this as spotlight, unset all others first
+      if (!currentSpotlightStatus) {
+        const allItems = await getDocs(collection(db, 'galleryItems'));
+        const updatePromises = allItems.docs.map((docItem) =>
+          updateDoc(doc(db, 'galleryItems', docItem.id), { isSpotlight: false })
+        );
+        await Promise.all(updatePromises);
+      }
+
+      // Toggle the current item's spotlight status
+      await updateDoc(doc(db, 'galleryItems', itemId), {
+        isSpotlight: !currentSpotlightStatus,
+      });
+
+      setMessage(
+        !currentSpotlightStatus
+          ? 'Item set as spotlight!'
+          : 'Spotlight removed!'
+      );
+      loadGalleryItems(); // Refresh the list
+    } catch (error) {
+      console.error('Error toggling spotlight:', error);
+      setMessage('Failed to update spotlight status');
     }
   };
 
@@ -265,33 +317,6 @@ function AdminPage() {
               placeholder='Enter the category for this item'
             />
             <FormControl component='fieldset' sx={{ mt: 2 }}>
-              <FormLabel component='legend'>Item Type</FormLabel>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.itemType === 'showcase'}
-                      onChange={handleItemTypeChange}
-                      value='showcase'
-                      name='itemType'
-                    />
-                  }
-                  label='Showcase'
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.itemType === 'tutorial'}
-                      onChange={handleItemTypeChange}
-                      value='tutorial'
-                      name='itemType'
-                    />
-                  }
-                  label='Tutorial'
-                />
-              </FormGroup>
-            </FormControl>
-            <FormControl component='fieldset' sx={{ mt: 2 }}>
               <FormLabel component='legend'>
                 Additional Images (Up to 8)
               </FormLabel>
@@ -311,6 +336,19 @@ function AdminPage() {
                   />
                 ))}
               </FormGroup>
+            </FormControl>
+
+            <FormControl component='fieldset' sx={{ mt: 2 }} fullWidth>
+              <FormLabel component='legend'>Card Type</FormLabel>
+              <Select
+                name='cardType'
+                value={formData.cardType}
+                onChange={handleCardTypeChange}
+                required
+              >
+                <MenuItem value='showcase'>Showcase</MenuItem>
+                <MenuItem value='information'>Information</MenuItem>
+              </Select>
             </FormControl>
             <Button
               type='submit'
@@ -336,21 +374,44 @@ function AdminPage() {
               <ListItem
                 key={item.id} // Use the Firestore document ID as the key
                 secondaryAction={
-                  <IconButton
-                    edge='end'
-                    aria-label='delete'
-                    onClick={() => handleDeleteClick(item.id)} // Pass the Firestore document ID
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton
+                      aria-label='toggle spotlight'
+                      onClick={() =>
+                        handleToggleSpotlight(item.id, item.isSpotlight)
+                      }
+                      color={item.isSpotlight ? 'warning' : 'default'}
+                    >
+                      {item.isSpotlight ? <StarIcon /> : <StarBorderIcon />}
+                    </IconButton>
+                    <IconButton
+                      edge='end'
+                      aria-label='delete'
+                      onClick={() => handleDeleteClick(item.id)} // Pass the Firestore document ID
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 }
               >
                 <ListItemText
                   primary={item.title}
                   secondary={
-                    item.description
-                      ? item.description.substring(0, 50) + '...'
-                      : 'No description'
+                    <>
+                      <Typography
+                        component='span'
+                        variant='body2'
+                        color='text.primary'
+                      >
+                        {item.cardType === 'showcase'
+                          ? 'Showcase'
+                          : 'Information'}
+                      </Typography>
+                      {' — '}
+                      {item.description
+                        ? item.description.substring(0, 50) + '...'
+                        : 'No description'}
+                    </>
                   }
                 />
               </ListItem>
