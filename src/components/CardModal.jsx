@@ -470,7 +470,14 @@ function CardModal({ open, onClose, item }) {
           >
             {item.email ? (
               <>
-                <AvatarGroup max={3}>
+                <AvatarGroup
+                  max={3}
+                  sx={{
+                    '& .MuiAvatar-root': {
+                      border: 'none',
+                    },
+                  }}
+                >
                   <Avatar
                     alt={item.email}
                     src='/static/images/avatar/1.jpg'

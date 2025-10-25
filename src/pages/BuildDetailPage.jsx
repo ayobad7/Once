@@ -518,7 +518,14 @@ function BuildDetailPage({ onToggleTheme }) {
               >
                 {build.email ? (
                   <>
-                    <AvatarGroup max={3}>
+                    <AvatarGroup
+                      max={3}
+                      sx={{
+                        '& .MuiAvatar-root': {
+                          border: 'none',
+                        },
+                      }}
+                    >
                       <Avatar
                         alt={build.email}
                         src='/static/images/avatar/1.jpg'

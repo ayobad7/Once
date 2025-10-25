@@ -121,7 +121,14 @@ function Author({ email, timestamp }) {
       >
         {email ? (
           <>
-            <AvatarGroup max={3}>
+            <AvatarGroup
+              max={3}
+              sx={{
+                '& .MuiAvatar-root': {
+                  border: 'none',
+                },
+              }}
+            >
               <Avatar
                 alt={email}
                 src='/static/images/avatar/1.jpg'
