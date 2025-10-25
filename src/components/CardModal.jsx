@@ -13,11 +13,14 @@ import {
   Stack,
   Avatar,
   AvatarGroup,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import DescriptionWithLinks from './DescriptionWithLinks';
 
@@ -34,6 +37,7 @@ const regionColors = {
 const buildColors = {
   'Base Design': 'error',
   'Room Design': 'secondary',
+  'City Build': 'primary',
   Tutorial: 'info',
   Outfit: 'primary',
   Character: 'warning',
@@ -47,6 +51,7 @@ const buildColors = {
 
 function CardModal({ open, onClose, item }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Reset to first image when modal opens
   React.useEffect(() => {
@@ -54,6 +59,20 @@ function CardModal({ open, onClose, item }) {
       setCurrentImageIndex(0);
     }
   }, [open]);
+
+  const handleCopyLink = (e) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/build/${item.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   if (!item) {
     return (
@@ -223,7 +242,7 @@ function CardModal({ open, onClose, item }) {
           )}
 
           {/* Social Icons */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {item.youtubeLink && (
               <Button
                 variant='contained'
@@ -250,11 +269,31 @@ function CardModal({ open, onClose, item }) {
                 Discord
               </Button>
             )}
+            <Button
+              variant='outlined'
+              startIcon={<LinkIcon />}
+              onClick={handleCopyLink}
+              sx={{
+                borderColor: 'text.secondary',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'text.primary',
+                  color: 'text.primary',
+                  backgroundColor: 'rgba(128, 128, 128, 0.1)',
+                },
+              }}
+            >
+              Share
+            </Button>
           </Box>
         </Box>
 
         {/* Description */}
-        <Typography variant='body1' color='text.primary' sx={{ mb: 3 }}>
+        <Typography
+          variant='body1'
+          color='text.primary'
+          sx={{ mb: 3, fontWeight: 300 }}
+        >
           <DescriptionWithLinks description={item.description} />
         </Typography>
 
@@ -465,6 +504,22 @@ function CardModal({ open, onClose, item }) {
           Close
         </Button>
       </DialogActions>
+
+      {/* Snackbar for copy link notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity='success'
+          sx={{ width: '100%' }}
+        >
+          Share link successfully copied!
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 }

@@ -11,6 +11,7 @@ import GalleryPage from './pages/GalleryPage';
 import EventPage from './pages/EventPage';
 import AboutPage from './pages/AboutPage';
 import FAQPage from './pages/FAQPage';
+import BuildDetailPage from './pages/BuildDetailPage';
 // DO NOT import BrowserRouter or Router here
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
@@ -84,6 +85,10 @@ function App() {
           element={<AboutPage onToggleTheme={toggleTheme} />}
         />
         <Route path='/faq' element={<FAQPage onToggleTheme={toggleTheme} />} />
+        <Route
+          path='/build/:id'
+          element={<BuildDetailPage onToggleTheme={toggleTheme} />}
+        />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/admin' element={<AdminPage />} />
       </Routes>

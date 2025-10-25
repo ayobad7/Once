@@ -1,5 +1,5 @@
 // src/components/ShowcaseCard.jsx - Styled to match MUI Blog Template
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardMedia,
@@ -11,9 +11,12 @@ import {
   Chip,
   Stack,
   IconButton,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase icon
 import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
@@ -34,6 +37,7 @@ const regionColors = {
 const buildColors = {
   'Base Design': 'error',
   'Room Design': 'secondary',
+  'City Build': 'primary',
   Tutorial: 'info',
   Outfit: 'primary',
   Character: 'warning',
@@ -136,6 +140,22 @@ function Author({ email, timestamp }) {
 }
 
 function ShowcaseCard({ item, layout, onClick }) {
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleCopyLink = (e) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/build/${item.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   // Determine image aspect ratio and height based on layout
   const getImageStyle = () => {
     switch (layout) {
@@ -349,7 +369,7 @@ function ShowcaseCard({ item, layout, onClick }) {
             )}
           </Stack>
 
-          {/* YouTube and Discord Icons */}
+          {/* YouTube, Discord, and Share Link Icons */}
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             {item.youtubeLink && (
               <IconButton
@@ -383,6 +403,18 @@ function ShowcaseCard({ item, layout, onClick }) {
                 <FaDiscord style={{ fontSize: '1.2rem' }} />
               </IconButton>
             )}
+            <IconButton
+              size='small'
+              onClick={handleCopyLink}
+              sx={{
+                padding: '4px',
+                color: 'text.secondary',
+                '&:hover': { backgroundColor: 'rgba(128, 128, 128, 0.1)' },
+              }}
+              title='Copy share link'
+            >
+              <LinkIcon sx={{ fontSize: '1.2rem' }} />
+            </IconButton>
           </Box>
         </Box>
 
@@ -394,6 +426,22 @@ function ShowcaseCard({ item, layout, onClick }) {
         </StyledTypography>
       </StyledCardContent>
       <Author email={item.email} timestamp={item.timestamp} />
+
+      {/* Snackbar for copy link notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity='success'
+          sx={{ width: '100%' }}
+        >
+          Share link successfully copied!
+        </Alert>
+      </Snackbar>
     </StyledCard>
   );
 }

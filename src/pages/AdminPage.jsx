@@ -99,6 +99,7 @@ function AdminPage() {
   const buildOptions = [
     { label: 'Base Design', color: 'error' },
     { label: 'Room Design', color: 'secondary' },
+    { label: 'City Build', color: 'primary' },
     { label: 'Tutorial', color: 'info' },
     { label: 'Outfit', color: 'primary' },
     { label: 'Character', color: 'warning' },

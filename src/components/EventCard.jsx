@@ -1,5 +1,5 @@
 // src/components/EventCard.jsx - Landscape Event Card Component
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardMedia,
@@ -10,9 +10,12 @@ import {
   Chip,
   Stack,
   IconButton,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import EventIcon from '@mui/icons-material/Event'; // Event icon
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
@@ -31,6 +34,7 @@ const regionColors = {
 const buildColors = {
   'Base Design': 'error',
   'Room Design': 'secondary',
+  'City Build': 'primary',
   Tutorial: 'info',
   Outfit: 'primary',
   Character: 'warning',
@@ -135,6 +139,22 @@ function Author({ email, timestamp }) {
 }
 
 function EventCard({ item, onClick }) {
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleCopyLink = (e) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/build/${item.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   return (
     <StyledCard variant='outlined' onClick={onClick} tabIndex={0}>
       {/* Image Section - 40% width on desktop */}
@@ -290,7 +310,7 @@ function EventCard({ item, onClick }) {
               )}
             </Stack>
 
-            {/* YouTube and Discord Icons */}
+            {/* YouTube, Discord, and Share Link Icons */}
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               {item.youtubeLink && (
                 <IconButton
@@ -324,6 +344,18 @@ function EventCard({ item, onClick }) {
                   <FaDiscord style={{ fontSize: '1.2rem' }} />
                 </IconButton>
               )}
+              <IconButton
+                size='small'
+                onClick={handleCopyLink}
+                sx={{
+                  padding: '4px',
+                  color: 'text.secondary',
+                  '&:hover': { backgroundColor: 'rgba(128, 128, 128, 0.1)' },
+                }}
+                title='Copy share link'
+              >
+                <LinkIcon sx={{ fontSize: '1.2rem' }} />
+              </IconButton>
             </Box>
           </Box>
 
@@ -338,6 +370,22 @@ function EventCard({ item, onClick }) {
 
         <Author email={item.email} timestamp={item.timestamp} />
       </Box>
+
+      {/* Snackbar for copy link notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity='success'
+          sx={{ width: '100%' }}
+        >
+          Share link successfully copied!
+        </Alert>
+      </Snackbar>
     </StyledCard>
   );
 }
