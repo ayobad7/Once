@@ -38,6 +38,9 @@ const buildColors = {
   Decoration: 'success',
   Bug: 'error',
   'Weapon Build': 'secondary',
+  Deviation: 'warning',
+  Update: 'info',
+  Class: 'success',
 };
 
 function CardModal({ open, onClose, item }) {

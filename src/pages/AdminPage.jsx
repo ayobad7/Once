@@ -102,6 +102,9 @@ function AdminPage() {
     { label: 'Decoration', color: 'success' },
     { label: 'Bug', color: 'error' },
     { label: 'Weapon Build', color: 'secondary' },
+    { label: 'Deviation', color: 'warning' },
+    { label: 'Update', color: 'info' },
+    { label: 'Class', color: 'success' },
   ];
 
   // Check authentication state on component mount
@@ -450,7 +453,17 @@ function AdminPage() {
         </Alert>
       )}
 
-      <Card sx={{ mb: 4 }}>
+      <Card
+        variant='outlined'
+        sx={{
+          mb: 4,
+          transition: 'all 0.2s',
+          '&:hover': {
+            boxShadow: 3,
+            transform: 'translateY(-2px)',
+          },
+        }}
+      >
         <CardContent>
           <Box
             sx={{
@@ -461,7 +474,7 @@ function AdminPage() {
             }}
           >
             <Typography variant='h6'>
-              {isEditing ? 'Edit Gallery Item' : 'Add New Gallery Item'}
+              {isEditing ? 'Edit Gallery Item' : 'Post New Item'}
             </Typography>
             {isEditing && (
               <Button
@@ -588,10 +601,10 @@ function AdminPage() {
               </Box>
             </FormControl>
 
-            {/* Build Chips */}
+            {/* Category Chips */}
             <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
               <FormLabel component='legend'>
-                Build Type (Select Multiple)
+                Category (Select Multiple)
               </FormLabel>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                 {buildOptions.map((build) => (

@@ -37,6 +37,9 @@ const buildColors = {
   Decoration: 'success',
   Bug: 'error',
   'Weapon Build': 'secondary',
+  Deviation: 'warning',
+  Update: 'info',
+  Class: 'success',
 };
 
 // Styled Card - Horizontal Layout

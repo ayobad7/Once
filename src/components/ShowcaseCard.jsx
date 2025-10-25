@@ -40,6 +40,9 @@ const buildColors = {
   Decoration: 'success',
   Bug: 'error',
   'Weapon Build': 'secondary',
+  Deviation: 'warning',
+  Update: 'info',
+  Class: 'success',
 };
 
 // Styled Card matching MUI template
