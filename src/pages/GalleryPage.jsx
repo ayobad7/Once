@@ -6,6 +6,8 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Box,
+  Pagination,
 } from '@mui/material';
 import { db } from '../firebase';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
@@ -15,12 +17,15 @@ import Footer from '../components/Footer';
 import ShowcaseCard from '../components/ShowcaseCard';
 import CardModal from '../components/CardModal';
 
+const ITEMS_PER_PAGE = 12;
+
 function GalleryPage({ onToggleTheme }) {
   const [galleryCards, setGalleryCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch all gallery cards
   useEffect(() => {
@@ -50,6 +55,19 @@ function GalleryPage({ onToggleTheme }) {
     };
     fetchGalleryCards();
   }, []);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(galleryCards.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentCards = galleryCards.slice(startIndex, endIndex);
+
+  // Function to handle page change
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+    // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Function to handle card click
   const handleCardClick = (item) => {
@@ -92,7 +110,7 @@ function GalleryPage({ onToggleTheme }) {
           </Typography>
 
           <Grid container spacing={2}>
-            {galleryCards.map((item) => (
+            {currentCards.map((item) => (
               <Grid item xs={12} md={4} key={item.id}>
                 <ShowcaseCard
                   item={item}
@@ -107,6 +125,23 @@ function GalleryPage({ onToggleTheme }) {
             <Typography variant='body1' align='center' sx={{ mt: 4 }}>
               No gallery items yet.
             </Typography>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Box
+              sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 4 }}
+            >
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color='primary'
+                size='large'
+                showFirstButton
+                showLastButton
+              />
+            </Box>
           )}
         </Container>
       </MainContent>
