@@ -27,6 +27,7 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
+  InputAdornment,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
@@ -38,6 +39,8 @@ import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase ico
 import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
 import EventIcon from '@mui/icons-material/Event'; // Event icon
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
+import YouTubeIcon from '@mui/icons-material/YouTube'; // YouTube icon
+import { FaDiscord } from 'react-icons/fa6'; // Discord icon
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
@@ -595,6 +598,11 @@ function AdminPage() {
                       fontWeight: formData.regions.includes(region.label)
                         ? 'bold'
                         : 'normal',
+                      ...(formData.regions.includes(region.label) && {
+                        border: 'none',
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#000' : undefined,
+                      }),
                     }}
                   />
                 ))}
@@ -622,6 +630,11 @@ function AdminPage() {
                       fontWeight: formData.builds.includes(build.label)
                         ? 'bold'
                         : 'normal',
+                      ...(formData.builds.includes(build.label) && {
+                        border: 'none',
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#000' : undefined,
+                      }),
                     }}
                   />
                 ))}
@@ -638,6 +651,13 @@ function AdminPage() {
               margin='normal'
               placeholder='https://youtube.com/...'
               helperText='Add a YouTube video link'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <YouTubeIcon sx={{ color: '#FF0000' }} />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -648,6 +668,15 @@ function AdminPage() {
               margin='normal'
               placeholder='https://discord.gg/...'
               helperText='Add a Discord server invite link'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <FaDiscord
+                      style={{ color: '#5865F2', fontSize: '1.2rem' }}
+                    />
+                  </InputAdornment>
+                ),
+              }}
             />
 
             {/* Additional Images - Full width like title */}

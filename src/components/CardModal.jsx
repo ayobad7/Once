@@ -456,7 +456,11 @@ function CardModal({ open, onClose, item }) {
         <Button
           onClick={onClose}
           variant='contained'
-          sx={{ width: { xs: '100%', sm: 'auto' } }}
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            borderRadius: '50px', // Pill shape
+            px: 4, // Extra horizontal padding for oblong shape
+          }}
         >
           Close
         </Button>
