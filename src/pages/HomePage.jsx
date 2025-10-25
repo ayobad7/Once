@@ -104,10 +104,10 @@ function HomePage({ onToggleTheme }) {
       <MainContent>
         <Container maxWidth='lg' sx={{ pt: 12, pb: 4 }}>
           <Typography variant='h1' component='h1' gutterBottom>
-            Blog
+            Build Showcase
           </Typography>
           <Typography variant='body1' gutterBottom sx={{ mb: 4 }}>
-            Stay in the loop with the latest about our products
+            Explore amazing bases from talented builders
           </Typography>
 
           {/* Fixed Layout: Spotlight + Showcase + Information */}

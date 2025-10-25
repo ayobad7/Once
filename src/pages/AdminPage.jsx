@@ -26,12 +26,15 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
-  Select, // Add this import
-  MenuItem, // Add this import if you use dropdown options
+  Select,
+  MenuItem,
+  Radio,
+  RadioGroup,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import Chip from '@mui/material/Chip';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db } from '../firebase'; // Adjust path if needed
 import {
@@ -50,10 +53,12 @@ function AdminPage() {
     title: '',
     description: '',
     imageUrl: '', // Main image URL
-    email: '', // Optional: User's email for avatar
     additionalImages: [], // Array to store up to 8 additional image URLs
     cardType: 'showcase', // New field: 'showcase' or 'information'
-    category: '', // New field for category
+    regions: [], // Array of selected region chips
+    builds: [], // Array of selected build chips
+    youtubeLink: '', // YouTube video link
+    discordLink: '', // Discord server link
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
@@ -61,6 +66,24 @@ function AdminPage() {
   const [itemToDelete, setItemToDelete] = useState(null);
   const navigate = useNavigate();
   const auth = getAuth();
+
+  // Chip options with MUI theme-aware colors
+  const regionOptions = [
+    { label: 'North America', color: 'error' },
+    { label: 'Europe', color: 'info' },
+    { label: 'South America', color: 'warning' },
+    { label: 'Southeast Asia', color: 'success' },
+    { label: 'Other Regions', color: 'secondary' },
+    { label: 'Custom Server', color: 'primary' },
+  ];
+
+  const buildOptions = [
+    { label: 'Showcase', color: 'error' },
+    { label: 'Tutorial', color: 'info' },
+    { label: 'Outfit', color: 'default' },
+    { label: 'Character', color: 'warning' },
+    { label: 'Decoration', color: 'success' },
+  ];
 
   // Check authentication state on component mount
   useEffect(() => {
@@ -73,7 +96,7 @@ function AdminPage() {
         const allowedEmails = [
           'ayobad7@gmail.com', // Add your allowed email addresses here
           'potato@once.com',
-          // 'admin@yourdomain.com',
+          'oncehumanbuilding@gmail.com',
         ];
 
         if (!allowedEmails.includes(user.email)) {
@@ -133,6 +156,20 @@ function AdminPage() {
     }));
   };
 
+  const handleChipToggle = (chipType, chipLabel) => {
+    setFormData((prev) => {
+      const currentArray = prev[chipType];
+      const isSelected = currentArray.includes(chipLabel);
+
+      return {
+        ...prev,
+        [chipType]: isSelected
+          ? currentArray.filter((item) => item !== chipLabel)
+          : [...currentArray, chipLabel],
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.imageUrl) {
@@ -141,19 +178,27 @@ function AdminPage() {
     }
 
     try {
+      // Get current user's email
+      const currentUser = auth.currentUser;
+      const userEmail = currentUser?.email || '';
+
       // Save gallery item data (including image URL) to Firestore
       await addDoc(collection(db, 'galleryItems'), {
         title: formData.title,
         description: formData.description,
         image: formData.imageUrl, // Main image URL
-        email: formData.email, // Optional: User's email
+        email: userEmail, // Auto-detected from logged-in user
         additionalImages: formData.additionalImages.filter(
           (img) => img.trim() !== ''
         ), // Filter out empty strings
         timestamp: new Date(), // Add a timestamp
         cardType: formData.cardType, // Add the cardType field
-        category: formData.category, // Add the category field
+        regions: formData.regions, // Add the regions chips
+        builds: formData.builds, // Add the builds chips
+        youtubeLink: formData.youtubeLink, // YouTube link
+        discordLink: formData.discordLink, // Discord link
         isSpotlight: false, // Default to not spotlight
+        spotlightDate: null, // Will be set when starred
       });
 
       setMessage('Gallery item added successfully!');
@@ -161,10 +206,12 @@ function AdminPage() {
         title: '',
         description: '',
         imageUrl: '',
-        email: '',
         additionalImages: [],
         cardType: 'showcase', // Reset to default
-        category: '', // Reset category field
+        regions: [], // Reset regions
+        builds: [], // Reset builds
+        youtubeLink: '',
+        discordLink: '',
       }); // Reset form
       loadGalleryItems(); // Refresh the list
     } catch (error) {
@@ -220,12 +267,19 @@ function AdminPage() {
           updateDoc(doc(db, 'galleryItems', docItem.id), { isSpotlight: false })
         );
         await Promise.all(updatePromises);
-      }
 
-      // Toggle the current item's spotlight status
-      await updateDoc(doc(db, 'galleryItems', itemId), {
-        isSpotlight: !currentSpotlightStatus,
-      });
+        // Set spotlight with permanent date
+        await updateDoc(doc(db, 'galleryItems', itemId), {
+          isSpotlight: true,
+          spotlightDate: new Date(), // Save date when starred
+        });
+      } else {
+        // Remove spotlight but keep the date
+        await updateDoc(doc(db, 'galleryItems', itemId), {
+          isSpotlight: false,
+          // spotlightDate remains - it's permanent
+        });
+      }
 
       setMessage(
         !currentSpotlightStatus
@@ -268,6 +322,29 @@ function AdminPage() {
             Add New Gallery Item
           </Typography>
           <form onSubmit={handleSubmit}>
+            {/* Card Type - Moved to top with Radio Group */}
+            <FormControl component='fieldset' sx={{ mb: 3 }} fullWidth>
+              <FormLabel component='legend'>Card Type</FormLabel>
+              <RadioGroup
+                row
+                name='cardType'
+                value={formData.cardType}
+                onChange={handleCardTypeChange}
+                sx={{ mt: 1 }}
+              >
+                <FormControlLabel
+                  value='showcase'
+                  control={<Radio />}
+                  label='Showcase'
+                />
+                <FormControlLabel
+                  value='information'
+                  control={<Radio />}
+                  label='Information'
+                />
+              </RadioGroup>
+            </FormControl>
+
             <TextField
               fullWidth
               label='Title'
@@ -298,32 +375,91 @@ function AdminPage() {
               required
               placeholder='Paste the direct link to your main image'
             />
+
+            {/* Region Chips */}
+            <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
+              <FormLabel component='legend'>Region (Select Multiple)</FormLabel>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                {regionOptions.map((region) => (
+                  <Chip
+                    key={region.label}
+                    label={region.label}
+                    color={region.color}
+                    variant={
+                      formData.regions.includes(region.label)
+                        ? 'filled'
+                        : 'outlined'
+                    }
+                    onClick={() => handleChipToggle('regions', region.label)}
+                    sx={{
+                      fontWeight: formData.regions.includes(region.label)
+                        ? 'bold'
+                        : 'normal',
+                    }}
+                  />
+                ))}
+              </Box>
+            </FormControl>
+
+            {/* Build Chips */}
+            <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
+              <FormLabel component='legend'>
+                Build Type (Select Multiple)
+              </FormLabel>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                {buildOptions.map((build) => (
+                  <Chip
+                    key={build.label}
+                    label={build.label}
+                    color={build.color}
+                    variant={
+                      formData.builds.includes(build.label)
+                        ? 'filled'
+                        : 'outlined'
+                    }
+                    onClick={() => handleChipToggle('builds', build.label)}
+                    sx={{
+                      fontWeight: formData.builds.includes(build.label)
+                        ? 'bold'
+                        : 'normal',
+                    }}
+                  />
+                ))}
+              </Box>
+            </FormControl>
+
+            {/* YouTube and Discord Links */}
             <TextField
               fullWidth
-              label='Email (Optional)'
-              name='email'
-              value={formData.email}
+              label='YouTube Link (Optional)'
+              name='youtubeLink'
+              value={formData.youtubeLink}
               onChange={handleInputChange}
               margin='normal'
-              placeholder='Enter your email for the avatar'
+              placeholder='https://youtube.com/...'
+              helperText='Add a YouTube video link'
             />
             <TextField
               fullWidth
-              label='Category'
-              name='category'
-              value={formData.category}
+              label='Discord Link (Optional)'
+              name='discordLink'
+              value={formData.discordLink}
               onChange={handleInputChange}
               margin='normal'
-              placeholder='Enter the category for this item'
+              placeholder='https://discord.gg/...'
+              helperText='Add a Discord server invite link'
             />
-            <FormControl component='fieldset' sx={{ mt: 2 }}>
+
+            {/* Additional Images - Full width like title */}
+            <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
               <FormLabel component='legend'>
                 Additional Images (Up to 8)
               </FormLabel>
               <FormGroup>
                 {[...Array(8)].map((_, index) => (
-                  <TextField // Use TextField instead of Input inside FormControlLabel
+                  <TextField
                     key={index}
+                    fullWidth
                     type='text'
                     value={formData.additionalImages[index] || ''}
                     onChange={(e) =>
@@ -331,24 +467,9 @@ function AdminPage() {
                     }
                     placeholder={`Additional Image ${index + 1} URL`}
                     sx={{ mt: 1 }}
-                    // Optional: Add helper text if needed
-                    // helperText={`Link for Image ${index + 1}`}
                   />
                 ))}
               </FormGroup>
-            </FormControl>
-
-            <FormControl component='fieldset' sx={{ mt: 2 }} fullWidth>
-              <FormLabel component='legend'>Card Type</FormLabel>
-              <Select
-                name='cardType'
-                value={formData.cardType}
-                onChange={handleCardTypeChange}
-                required
-              >
-                <MenuItem value='showcase'>Showcase</MenuItem>
-                <MenuItem value='information'>Information</MenuItem>
-              </Select>
             </FormControl>
             <Button
               type='submit'

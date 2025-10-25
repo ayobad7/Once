@@ -8,8 +8,31 @@ import {
   Box,
   Avatar,
   AvatarGroup,
+  Chip,
+  Stack,
+  IconButton,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import { FaDiscord } from 'react-icons/fa6';
+
+// MUI theme-aware color mappings for chips
+const regionColors = {
+  'North America': 'error',
+  Europe: 'info',
+  'South America': 'warning',
+  'Southeast Asia': 'success',
+  'Other Regions': 'secondary',
+  'Custom Server': 'primary',
+};
+
+const buildColors = {
+  Showcase: 'error',
+  Tutorial: 'info',
+  Outfit: 'default',
+  Character: 'warning',
+  Decoration: 'success',
+};
 
 // Styled Card matching MUI template
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -136,20 +159,154 @@ function ShowcaseCard({ item, layout, onClick }) {
       variant='outlined'
       onClick={onClick}
       tabIndex={0}
-      sx={{ height: '100%' }}
+      sx={{ height: '100%', position: 'relative' }}
     >
       {item.image && (
-        <CardMedia
-          component='img'
-          alt={item.title}
-          image={item.image}
-          sx={getImageStyle()}
-        />
+        <Box
+          sx={{
+            position: 'relative',
+            ...(layout === 'information' && {
+              height: { sm: 'auto', md: '50%' },
+            }),
+          }}
+        >
+          <CardMedia
+            component='img'
+            alt={item.title}
+            image={item.image}
+            sx={{
+              ...getImageStyle(),
+              ...(layout === 'information' && {
+                height: '100%',
+                objectFit: 'cover',
+              }),
+            }}
+          />
+          {/* Builder Spotlight Chip - Positioned on top-left of image */}
+          {item.spotlightDate && (
+            <Chip
+              label={`Builder Spotlight - ${
+                item.spotlightDate.toDate
+                  ? item.spotlightDate.toDate().toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                    })
+                  : 'Featured'
+              }`}
+              size='small'
+              color='warning'
+              sx={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                fontWeight: 'bold',
+                fontSize: '0.7rem',
+                height: '22px',
+                border: 'none',
+                boxShadow: 'none',
+              }}
+            />
+          )}
+        </Box>
       )}
       <StyledCardContent>
-        <Typography gutterBottom variant='caption' component='div'>
-          {item.category || 'Uncategorized'}
-        </Typography>
+        {/* Display Chips and Social Icons */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+            mb: 1,
+          }}
+        >
+          <Stack
+            direction='row'
+            spacing={0.5}
+            flexWrap='wrap'
+            sx={{ gap: 0.5, flex: 1 }}
+          >
+            {item.regions &&
+              item.regions.slice(0, 2).map((region) => (
+                <Chip
+                  key={region}
+                  label={region}
+                  size='small'
+                  color={regionColors[region] || 'default'}
+                  variant='filled'
+                  sx={{
+                    fontSize: '0.65rem',
+                    height: '20px',
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                  }}
+                />
+              ))}
+            {item.builds &&
+              item.builds.slice(0, 2).map((build) => (
+                <Chip
+                  key={build}
+                  label={build}
+                  size='small'
+                  color={buildColors[build] || 'default'}
+                  variant='filled'
+                  sx={{
+                    fontSize: '0.65rem',
+                    height: '20px',
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                  }}
+                />
+              ))}
+            {(item.regions?.length > 2 || item.builds?.length > 2) && (
+              <Typography
+                variant='caption'
+                sx={{ ml: 0.5, alignSelf: 'center' }}
+              >
+                +{(item.regions?.length || 0) + (item.builds?.length || 0) - 4}
+              </Typography>
+            )}
+          </Stack>
+
+          {/* YouTube and Discord Icons */}
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {item.youtubeLink && (
+              <IconButton
+                size='small'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(item.youtubeLink, '_blank');
+                }}
+                sx={{
+                  padding: '4px',
+                  color: '#FF0000',
+                  '&:hover': { backgroundColor: 'rgba(255, 0, 0, 0.1)' },
+                }}
+              >
+                <YouTubeIcon sx={{ fontSize: '1.5rem' }} />
+              </IconButton>
+            )}
+            {item.discordLink && (
+              <IconButton
+                size='small'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(item.discordLink, '_blank');
+                }}
+                sx={{
+                  padding: '4px',
+                  color: '#5865F2',
+                  '&:hover': { backgroundColor: 'rgba(88, 101, 242, 0.1)' },
+                }}
+              >
+                <FaDiscord style={{ fontSize: '1.2rem' }} />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+
         <Typography gutterBottom variant='h6' component='div'>
           {item.title}
         </Typography>

@@ -118,7 +118,7 @@ const lightTheme = createTheme({
     divider: alpha(gray[300], 0.4),
   },
   typography: {
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: '"Outfit", sans-serif',
     h1: {
       fontSize: '48px',
       fontWeight: 600,
@@ -257,7 +257,7 @@ const darkTheme = createTheme({
     divider: alpha(gray[700], 0.6),
   },
   typography: {
-    fontFamily: 'Inter, sans-serif',
+    fontFamily: '"Outfit", sans-serif',
     h1: {
       fontSize: '48px',
       fontWeight: 600,
