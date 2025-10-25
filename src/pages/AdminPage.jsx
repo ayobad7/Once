@@ -35,6 +35,8 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import HomeIcon from '@mui/icons-material/Home';
 import LinkIcon from '@mui/icons-material/Link'; // Link icon for adding links
+import SearchIcon from '@mui/icons-material/Search'; // Search icon
+import CloseIcon from '@mui/icons-material/Close'; // Close icon
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase icon
 import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
 import EventIcon from '@mui/icons-material/Event'; // Event icon
@@ -75,6 +77,7 @@ function AdminPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [filterType, setFilterType] = useState('all'); // 'all', 'showcase', 'gallery', 'event'
+  const [searchQuery, setSearchQuery] = useState(''); // Search query for filtering
 
   // Link modal states
   const [linkModalOpen, setLinkModalOpen] = useState(false);
@@ -729,77 +732,141 @@ function AdminPage() {
         >
           <Typography variant='h6'>
             Existing Gallery Items (
-            {filterType === 'all'
-              ? galleryItems.length
-              : galleryItems.filter((item) => item.cardType === filterType)
-                  .length}
+            {
+              galleryItems.filter((item) => {
+                const matchesType =
+                  filterType === 'all' ? true : item.cardType === filterType;
+                const matchesSearch =
+                  searchQuery.trim() === '' ||
+                  item.title
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                  item.description
+                    ?.toLowerCase()
+                    .includes(searchQuery.toLowerCase());
+                return matchesType && matchesSearch;
+              }).length
+            }
             )
           </Typography>
 
-          {/* Filter Pills */}
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip
-              label='All'
-              onClick={() => setFilterType('all')}
-              variant={filterType === 'all' ? 'filled' : 'outlined'}
-              color='default'
-              sx={{
-                fontWeight: filterType === 'all' ? 'bold' : 'normal',
+          {/* Filter Pills and Search */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            {/* Filter Pills */}
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Chip
+                label='All'
+                onClick={() => setFilterType('all')}
+                variant={filterType === 'all' ? 'filled' : 'outlined'}
+                color='default'
+                sx={{
+                  fontWeight: filterType === 'all' ? 'bold' : 'normal',
+                }}
+              />
+              <Chip
+                icon={
+                  <ViewCarouselIcon sx={{ fontSize: '0.9rem !important' }} />
+                }
+                label='Showcase'
+                onClick={() => setFilterType('showcase')}
+                variant={filterType === 'showcase' ? 'filled' : 'outlined'}
+                color='error'
+                sx={{
+                  fontWeight: filterType === 'showcase' ? 'bold' : 'normal',
+                  ...(filterType === 'showcase' && {
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                  }),
+                }}
+              />
+              <Chip
+                icon={
+                  <CollectionsIcon sx={{ fontSize: '0.9rem !important' }} />
+                }
+                label='Gallery'
+                onClick={() => setFilterType('gallery')}
+                variant={filterType === 'gallery' ? 'filled' : 'outlined'}
+                color='info'
+                sx={{
+                  fontWeight: filterType === 'gallery' ? 'bold' : 'normal',
+                  ...(filterType === 'gallery' && {
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                  }),
+                }}
+              />
+              <Chip
+                icon={<EventIcon sx={{ fontSize: '0.9rem !important' }} />}
+                label='Event'
+                onClick={() => setFilterType('event')}
+                variant={filterType === 'event' ? 'filled' : 'outlined'}
+                color='warning'
+                sx={{
+                  fontWeight: filterType === 'event' ? 'bold' : 'normal',
+                  ...(filterType === 'event' && {
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                  }),
+                }}
+              />
+            </Box>
+
+            {/* Search Bar */}
+            <TextField
+              size='small'
+              placeholder='Search title or description...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position='end'>
+                    <IconButton
+                      size='small'
+                      onClick={() => setSearchQuery('')}
+                      edge='end'
+                    >
+                      <CloseIcon fontSize='small' />
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
-            />
-            <Chip
-              icon={<ViewCarouselIcon sx={{ fontSize: '0.9rem !important' }} />}
-              label='Showcase'
-              onClick={() => setFilterType('showcase')}
-              variant={filterType === 'showcase' ? 'filled' : 'outlined'}
-              color='error'
-              sx={{
-                fontWeight: filterType === 'showcase' ? 'bold' : 'normal',
-                ...(filterType === 'showcase' && {
-                  border: 'none',
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? '#000' : undefined,
-                }),
-              }}
-            />
-            <Chip
-              icon={<CollectionsIcon sx={{ fontSize: '0.9rem !important' }} />}
-              label='Gallery'
-              onClick={() => setFilterType('gallery')}
-              variant={filterType === 'gallery' ? 'filled' : 'outlined'}
-              color='info'
-              sx={{
-                fontWeight: filterType === 'gallery' ? 'bold' : 'normal',
-                ...(filterType === 'gallery' && {
-                  border: 'none',
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? '#000' : undefined,
-                }),
-              }}
-            />
-            <Chip
-              icon={<EventIcon sx={{ fontSize: '0.9rem !important' }} />}
-              label='Event'
-              onClick={() => setFilterType('event')}
-              variant={filterType === 'event' ? 'filled' : 'outlined'}
-              color='warning'
-              sx={{
-                fontWeight: filterType === 'event' ? 'bold' : 'normal',
-                ...(filterType === 'event' && {
-                  border: 'none',
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? '#000' : undefined,
-                }),
-              }}
+              sx={{ minWidth: { xs: '100%', sm: '250px' } }}
             />
           </Box>
         </Box>
 
         <Grid container spacing={2}>
           {galleryItems
-            .filter((item) =>
-              filterType === 'all' ? true : item.cardType === filterType
-            )
+            .filter((item) => {
+              // Filter by card type
+              const matchesType =
+                filterType === 'all' ? true : item.cardType === filterType;
+
+              // Filter by search query (title or description)
+              const matchesSearch =
+                searchQuery.trim() === '' ||
+                item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.description
+                  ?.toLowerCase()
+                  .includes(searchQuery.toLowerCase());
+
+              return matchesType && matchesSearch;
+            })
             .map((item) => (
               <Grid item xs={12} sm={6} md={3} key={item.id}>
                 <Card
@@ -985,16 +1052,24 @@ function AdminPage() {
         </Grid>
 
         {/* Empty State */}
-        {galleryItems.filter((item) =>
-          filterType === 'all' ? true : item.cardType === filterType
-        ).length === 0 && (
+        {galleryItems.filter((item) => {
+          const matchesType =
+            filterType === 'all' ? true : item.cardType === filterType;
+          const matchesSearch =
+            searchQuery.trim() === '' ||
+            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesType && matchesSearch;
+        }).length === 0 && (
           <Typography
             variant='body1'
             align='center'
             color='text.secondary'
             sx={{ mt: 4 }}
           >
-            {filterType === 'all'
+            {searchQuery.trim() !== ''
+              ? `No items match "${searchQuery}"`
+              : filterType === 'all'
               ? 'No items yet. Create your first item above!'
               : `No ${filterType} items found.`}
           </Typography>
