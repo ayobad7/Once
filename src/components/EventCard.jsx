@@ -19,6 +19,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import EventIcon from '@mui/icons-material/Event'; // Event icon
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
+import TimerIcon from '@mui/icons-material/Timer'; // Days left icon
 import LanguageIcon from '@mui/icons-material/Language'; // Region icon
 import FoundationIcon from '@mui/icons-material/Foundation'; // Base Design
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'; // Room Design
@@ -207,7 +208,26 @@ function EventCard({ item, onClick, showTypePill = false }) {
     }
   };
 
+  // Calculate days remaining for ongoing events
+  const getDaysRemaining = () => {
+    if (!item.eventEndDate || !eventStatus || eventStatus.label !== 'Ongoing') {
+      return null;
+    }
+
+    const now = new Date();
+    const endDate = new Date(item.eventEndDate);
+
+    now.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const timeDiff = endDate.getTime() - now.getTime();
+    const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    return daysLeft > 0 ? daysLeft : 0;
+  };
+
   const eventStatus = getEventStatus();
+  const daysRemaining = getDaysRemaining();
 
   return (
     <StyledCard variant='outlined' onClick={onClick} tabIndex={0}>
@@ -280,7 +300,7 @@ function EventCard({ item, onClick, showTypePill = false }) {
               color='warning'
               sx={{
                 position: 'absolute',
-                top: eventStatus ? 42 : 12, // Position below status if it exists
+                top: eventStatus ? 42 : 12, // Position below status pill
                 left: 12,
                 fontWeight: 'bold',
                 fontSize: '0.7rem',
@@ -346,6 +366,35 @@ function EventCard({ item, onClick, showTypePill = false }) {
               flexWrap='wrap'
               sx={{ gap: 0.5, flex: 1 }}
             >
+              {/* Days Remaining Chip - Only for ongoing events */}
+              {daysRemaining !== null && (
+                <Chip
+                  icon={
+                    <TimerIcon
+                      sx={{
+                        fontSize: '0.75rem !important',
+                        color: 'inherit !important',
+                      }}
+                    />
+                  }
+                  label={`${daysRemaining} ${
+                    daysRemaining === 1 ? 'day' : 'days'
+                  } left`}
+                  size='small'
+                  color='warning'
+                  variant='filled'
+                  sx={{
+                    fontSize: '0.65rem',
+                    height: '20px',
+                    border: 'none',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#000' : undefined,
+                    '& .MuiChip-icon': {
+                      marginLeft: '6px',
+                    },
+                  }}
+                />
+              )}
               {item.regions &&
                 item.regions.slice(0, 2).map((region) => (
                   <Chip
