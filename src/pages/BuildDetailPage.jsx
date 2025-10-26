@@ -28,6 +28,7 @@ import AppAppBar from '../components/AppAppBar';
 import MainContent from '../components/MainContent';
 import Footer from '../components/Footer';
 import DescriptionWithLinks from '../components/DescriptionWithLinks';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 // Color mappings (same as CardModal)
 const regionColors = {
@@ -60,6 +61,8 @@ function BuildDetailPage({ onToggleTheme }) {
   const [build, setBuild] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [zoomModalOpen, setZoomModalOpen] = useState(false);
+  const [zoomImageUrl, setZoomImageUrl] = useState('');
 
   useEffect(() => {
     const fetchBuild = async () => {
@@ -163,6 +166,16 @@ function BuildDetailPage({ onToggleTheme }) {
 
   const handleThumbnailClick = (index) => {
     setCurrentImageIndex(index);
+  };
+
+  const handleImageClick = (imageUrl) => {
+    setZoomImageUrl(imageUrl);
+    setZoomModalOpen(true);
+  };
+
+  const handleCloseZoomModal = () => {
+    setZoomModalOpen(false);
+    setZoomImageUrl('');
   };
 
   return (
@@ -400,10 +413,14 @@ function BuildDetailPage({ onToggleTheme }) {
                   <img
                     src={allImages[currentImageIndex]}
                     alt={`${build.title} - Image ${currentImageIndex + 1}`}
+                    onClick={() =>
+                      handleImageClick(allImages[currentImageIndex])
+                    }
                     style={{
                       maxWidth: '100%',
                       maxHeight: '100%',
                       objectFit: 'contain',
+                      cursor: 'pointer',
                     }}
                   />
 
@@ -475,6 +492,7 @@ function BuildDetailPage({ onToggleTheme }) {
                       <Box
                         key={index}
                         onClick={() => handleThumbnailClick(index)}
+                        onDoubleClick={() => handleImageClick(img)}
                         sx={{
                           minWidth: '80px',
                           height: '80px',
@@ -489,6 +507,7 @@ function BuildDetailPage({ onToggleTheme }) {
                           opacity: currentImageIndex === index ? 1 : 0.6,
                           transition: 'all 0.2s',
                           '&:hover': { opacity: 1 },
+                          position: 'relative',
                         }}
                       >
                         <img
@@ -558,6 +577,14 @@ function BuildDetailPage({ onToggleTheme }) {
         </Container>
       </MainContent>
       <Footer />
+
+      {/* Image Zoom Viewer Modal */}
+      <ImageViewerModal
+        open={zoomModalOpen}
+        onClose={handleCloseZoomModal}
+        imageUrl={zoomImageUrl}
+        imageName={build?.title}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 // src/components/CardModal.jsx - Enhanced with Image Gallery
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogTitle,
@@ -21,6 +22,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import LinkIcon from '@mui/icons-material/Link';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { FaDiscord } from 'react-icons/fa6';
 import DescriptionWithLinks from './DescriptionWithLinks';
 
@@ -52,6 +54,7 @@ const buildColors = {
 function CardModal({ open, onClose, item }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Reset to first image when modal opens
   React.useEffect(() => {
@@ -65,6 +68,12 @@ function CardModal({ open, onClose, item }) {
     const shareUrl = `${window.location.origin}/build/${item.id}`;
     navigator.clipboard.writeText(shareUrl);
     setSnackbarOpen(true);
+  };
+
+  const handleOpenPage = (e) => {
+    e.stopPropagation();
+    navigate(`/build/${item.id}`);
+    onClose(); // Close the modal
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -251,6 +260,8 @@ function CardModal({ open, onClose, item }) {
                 sx={{
                   backgroundColor: '#FF0000',
                   '&:hover': { backgroundColor: '#CC0000' },
+                  borderRadius: '50px',
+                  px: 3,
                 }}
               >
                 YouTube
@@ -264,26 +275,61 @@ function CardModal({ open, onClose, item }) {
                 sx={{
                   backgroundColor: '#5865F2',
                   '&:hover': { backgroundColor: '#4752C4' },
+                  borderRadius: '50px',
+                  px: 3,
                 }}
               >
                 Discord
               </Button>
             )}
             <Button
-              variant='outlined'
+              variant='contained'
               startIcon={<LinkIcon />}
               onClick={handleCopyLink}
               sx={{
-                borderColor: 'text.secondary',
-                color: 'text.secondary',
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.15)'
+                    : 'rgba(0, 0, 0, 0.08)',
+                color: 'text.primary',
+                borderRadius: '50px',
+                px: 3,
+                boxShadow: 'none',
                 '&:hover': {
-                  borderColor: 'text.primary',
-                  color: 'text.primary',
-                  backgroundColor: 'rgba(128, 128, 128, 0.1)',
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.25)'
+                      : 'rgba(0, 0, 0, 0.15)',
+                  boxShadow: 'none',
                 },
               }}
             >
               Share
+            </Button>
+            <Button
+              variant='contained'
+              startIcon={<OpenInNewIcon />}
+              onClick={handleOpenPage}
+              sx={{
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.15)'
+                    : 'rgba(0, 0, 0, 0.08)',
+                color: 'text.primary',
+                borderRadius: '50px',
+                px: 3,
+                boxShadow: 'none',
+                '&:hover': {
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.25)'
+                      : 'rgba(0, 0, 0, 0.15)',
+                  boxShadow: 'none',
+                },
+              }}
+              title='Open in page'
+            >
+              View
             </Button>
           </Box>
         </Box>
