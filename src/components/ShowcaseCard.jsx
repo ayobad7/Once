@@ -22,6 +22,18 @@ import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase ico
 import CollectionsIcon from '@mui/icons-material/Collections'; // Gallery icon
 import EventIcon from '@mui/icons-material/Event'; // Event icon
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
+import LanguageIcon from '@mui/icons-material/Language'; // Region icon
+import FoundationIcon from '@mui/icons-material/Foundation'; // Base Design
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'; // Room Design
+import LocationCityIcon from '@mui/icons-material/LocationCity'; // City Build
+import PlumbingIcon from '@mui/icons-material/Plumbing'; // Tutorial
+import CheckroomIcon from '@mui/icons-material/Checkroom'; // Outfit
+import PersonSearchIcon from '@mui/icons-material/PersonSearch'; // Character
+import ChairIcon from '@mui/icons-material/Chair'; // Decoration
+import BugReportIcon from '@mui/icons-material/BugReport'; // Bug
+import WhatshotIcon from '@mui/icons-material/Whatshot'; // Weapon Build
+import PetsIcon from '@mui/icons-material/Pets'; // Deviation
+import UpdateIcon from '@mui/icons-material/Update'; // Update & Class
 import DescriptionWithLinks from './DescriptionWithLinks';
 
 // MUI theme-aware color mappings for chips
@@ -47,6 +59,22 @@ const buildColors = {
   Deviation: 'warning',
   Update: 'info',
   Class: 'success',
+};
+
+// Icon mappings for categories
+const buildIcons = {
+  'Base Design': FoundationIcon,
+  'Room Design': MeetingRoomIcon,
+  'City Build': LocationCityIcon,
+  Tutorial: PlumbingIcon,
+  Outfit: CheckroomIcon,
+  Character: PersonSearchIcon,
+  Decoration: ChairIcon,
+  Bug: BugReportIcon,
+  'Weapon Build': WhatshotIcon,
+  Deviation: PetsIcon,
+  Update: UpdateIcon,
+  Class: UpdateIcon,
 };
 
 // Styled Card matching MUI template
@@ -146,7 +174,7 @@ function Author({ email, timestamp }) {
   );
 }
 
-function ShowcaseCard({ item, layout, onClick }) {
+function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleCopyLink = (e) => {
@@ -259,62 +287,64 @@ function ShowcaseCard({ item, layout, onClick }) {
         </Box>
       )}
       <StyledCardContent>
-        {/* Card Type Pill with Icon */}
-        <Chip
-          icon={
-            item.cardType === 'showcase' ? (
-              <ViewCarouselIcon
-                sx={{
-                  fontSize: '0.85rem !important',
-                  color: 'inherit !important',
-                }}
-              />
-            ) : item.cardType === 'gallery' ? (
-              <CollectionsIcon
-                sx={{
-                  fontSize: '0.85rem !important',
-                  color: 'inherit !important',
-                }}
-              />
-            ) : (
-              <EventIcon
-                sx={{
-                  fontSize: '0.85rem !important',
-                  color: 'inherit !important',
-                }}
-              />
-            )
-          }
-          label={
-            item.cardType === 'showcase'
-              ? 'Showcase'
-              : item.cardType === 'gallery'
-              ? 'Gallery'
-              : 'Event'
-          }
-          size='small'
-          color={
-            item.cardType === 'showcase'
-              ? 'error'
-              : item.cardType === 'gallery'
-              ? 'info'
-              : 'warning'
-          }
-          variant='filled'
-          sx={{
-            alignSelf: 'flex-start',
-            fontWeight: 'bold',
-            fontSize: '0.65rem',
-            height: '22px',
-            border: 'none',
-            color: (theme) =>
-              theme.palette.mode === 'dark' ? '#000' : undefined,
-            mb: 1,
-            '& .MuiChip-icon': {
-              marginLeft: '6px',
-            },
-          }}
-        />
+        {/* Card Type Pill with Icon - Conditionally rendered */}
+        {showTypePill && (
+          <Chip
+            icon={
+              item.cardType === 'showcase' ? (
+                <ViewCarouselIcon
+                  sx={{
+                    fontSize: '0.85rem !important',
+                    color: 'inherit !important',
+                  }}
+                />
+              ) : item.cardType === 'gallery' ? (
+                <CollectionsIcon
+                  sx={{
+                    fontSize: '0.85rem !important',
+                    color: 'inherit !important',
+                  }}
+                />
+              ) : (
+                <EventIcon
+                  sx={{
+                    fontSize: '0.85rem !important',
+                    color: 'inherit !important',
+                  }}
+                />
+              )
+            }
+            label={
+              item.cardType === 'showcase'
+                ? 'Showcase'
+                : item.cardType === 'gallery'
+                ? 'Gallery'
+                : 'Event'
+            }
+            size='small'
+            color={
+              item.cardType === 'showcase'
+                ? 'error'
+                : item.cardType === 'gallery'
+                ? 'info'
+                : 'warning'
+            }
+            variant='filled'
+            sx={{
+              alignSelf: 'flex-start',
+              fontWeight: 'bold',
+              fontSize: '0.65rem',
+              height: '22px',
+              border: 'none',
+              color: (theme) =>
+                theme.palette.mode === 'dark' ? '#000' : undefined,
+              mb: 1,
+              '& .MuiChip-icon': {
+                marginLeft: '6px',
+              },
+            }}
+          />
+        )}
 
         {/* Display Region/Build Chips and Social Icons */}
         <Box
@@ -336,6 +366,14 @@ function ShowcaseCard({ item, layout, onClick }) {
               item.regions.slice(0, 2).map((region) => (
                 <Chip
                   key={region}
+                  icon={
+                    <LanguageIcon
+                      sx={{
+                        fontSize: '0.75rem !important',
+                        color: 'inherit !important',
+                      }}
+                    />
+                  }
                   label={region}
                   size='small'
                   color={regionColors[region] || 'default'}
@@ -346,26 +384,45 @@ function ShowcaseCard({ item, layout, onClick }) {
                     border: 'none',
                     color: (theme) =>
                       theme.palette.mode === 'dark' ? '#000' : undefined,
+                    '& .MuiChip-icon': {
+                      marginLeft: '6px',
+                    },
                   }}
                 />
               ))}
             {item.builds &&
-              item.builds.slice(0, 2).map((build) => (
-                <Chip
-                  key={build}
-                  label={build}
-                  size='small'
-                  color={buildColors[build] || 'default'}
-                  variant='filled'
-                  sx={{
-                    fontSize: '0.65rem',
-                    height: '20px',
-                    border: 'none',
-                    color: (theme) =>
-                      theme.palette.mode === 'dark' ? '#000' : undefined,
-                  }}
-                />
-              ))}
+              item.builds.slice(0, 2).map((build) => {
+                const IconComponent = buildIcons[build];
+                return (
+                  <Chip
+                    key={build}
+                    icon={
+                      IconComponent ? (
+                        <IconComponent
+                          sx={{
+                            fontSize: '0.75rem !important',
+                            color: 'inherit !important',
+                          }}
+                        />
+                      ) : undefined
+                    }
+                    label={build}
+                    size='small'
+                    color={buildColors[build] || 'default'}
+                    variant='filled'
+                    sx={{
+                      fontSize: '0.65rem',
+                      height: '20px',
+                      border: 'none',
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? '#000' : undefined,
+                      '& .MuiChip-icon': {
+                        marginLeft: '6px',
+                      },
+                    }}
+                  />
+                );
+              })}
             {(item.regions?.length > 2 || item.builds?.length > 2) && (
               <Typography
                 variant='caption'
