@@ -14,10 +14,14 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  IconButton,
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4'; // Dark mode icon
 import Brightness7Icon from '@mui/icons-material/Brightness7'; // Light mode icon
 import MenuIcon from '@mui/icons-material/Menu'; // Hamburger icon
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import { FaDiscord, FaXTwitter } from 'react-icons/fa6';
+import { SiKofi } from 'react-icons/si';
 import { Link } from 'react-router-dom'; // Import Link for routing
 import { useTheme } from '@mui/material/styles'; // Use useTheme hook to get current theme
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -69,7 +73,6 @@ function AppAppBar({ onToggleTheme }) {
     { text: 'Gallery', href: '/gallery' },
     { text: 'Event', href: '/event' },
     { text: 'About', href: '/about' },
-    { text: 'FAQ', href: '/faq' },
   ];
 
   return (
@@ -174,29 +177,92 @@ function AppAppBar({ onToggleTheme }) {
             >
               {isLoggedIn ? 'Post' : 'Sign in'}
             </Button>
-            {/* Dark/Light Mode Toggle Button */}
-            <Button
+
+            {/* Social Icons */}
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <IconButton
+                size='small'
+                href='https://ko-fi.com/oncearchitect'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  '&:hover': { color: '#FF5E5B' },
+                }}
+                aria-label='Ko-fi'
+              >
+                <SiKofi style={{ fontSize: '1.1rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://x.com/jesstronbuilds'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  '&:hover': {
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#fff' : '#000',
+                  },
+                }}
+                aria-label='Twitter/X'
+              >
+                <FaXTwitter style={{ fontSize: '1.1rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://www.youtube.com/@jesstronbuilding'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  '&:hover': { color: '#FF0000' },
+                }}
+                aria-label='YouTube'
+              >
+                <YouTubeIcon sx={{ fontSize: '1.3rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://discord.com/invite/vRHTtVqKpT'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  '&:hover': { color: '#5865F2' },
+                }}
+                aria-label='Discord'
+              >
+                <FaDiscord style={{ fontSize: '1.1rem' }} />
+              </IconButton>
+            </Box>
+
+            {/* Dark/Light Mode Toggle Button - Icon Only */}
+            <IconButton
               onClick={onToggleTheme}
               color='inherit'
               size='small'
               sx={{
-                borderRadius: '20px', // Pill shape for button
-                my: 1,
-                mx: 1.5,
+                ml: 0.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)', // Example light hover
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
-              startIcon={
-                currentMode === 'dark' ? (
-                  <Brightness7Icon />
-                ) : (
-                  <Brightness4Icon />
-                )
+              aria-label={
+                currentMode === 'dark'
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode'
               }
             >
-              {currentMode === 'dark' ? 'Light' : 'Dark'}
-            </Button>
+              {currentMode === 'dark' ? (
+                <Brightness7Icon />
+              ) : (
+                <Brightness4Icon />
+              )}
+            </IconButton>
           </Box>
 
           {/* Mobile Menu Button - Hidden on desktop */}
@@ -207,27 +273,27 @@ function AppAppBar({ onToggleTheme }) {
               alignItems: 'center',
             }}
           >
-            <Button
+            <IconButton
               onClick={onToggleTheme}
               color='inherit'
               size='small'
               sx={{
-                borderRadius: '20px', // Pill shape for mobile toggle
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)', // Example light hover
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
-              startIcon={
-                currentMode === 'dark' ? (
-                  <Brightness7Icon />
-                ) : (
-                  <Brightness4Icon />
-                )
+              aria-label={
+                currentMode === 'dark'
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode'
               }
             >
-              {currentMode === 'dark' ? 'L' : 'D'}{' '}
-              {/* Shorter text for mobile */}
-            </Button>
+              {currentMode === 'dark' ? (
+                <Brightness7Icon />
+              ) : (
+                <Brightness4Icon />
+              )}
+            </IconButton>
             <Button
               color='inherit'
               aria-label='open drawer'
@@ -329,22 +395,31 @@ function AppAppBar({ onToggleTheme }) {
                   <ListItemText primary={isLoggedIn ? 'Post' : 'Sign in'} />
                 </ListItemButton>
               </ListItem>
-              {/* Theme Toggle in Mobile Menu (Optional) */}
+              {/* Theme Toggle in Mobile Menu - Icon Only */}
               <ListItem disablePadding>
                 <ListItemButton
                   onClick={() => {
                     onToggleTheme();
                     handleDrawerToggle();
                   }}
-                  sx={{ borderRadius: '20px', mx: 1 }}
+                  sx={{
+                    borderRadius: '20px',
+                    mx: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
                 >
-                  {' '}
-                  {/* Pill shape for list items */}
-                  <ListItemText
-                    primary={
-                      currentMode === 'dark' ? 'Light Mode' : 'Dark Mode'
-                    }
-                  />
+                  <IconButton
+                    color='inherit'
+                    size='small'
+                    sx={{ pointerEvents: 'none' }}
+                  >
+                    {currentMode === 'dark' ? (
+                      <Brightness7Icon />
+                    ) : (
+                      <Brightness4Icon />
+                    )}
+                  </IconButton>
                 </ListItemButton>
               </ListItem>
             </List>

@@ -12,11 +12,14 @@ import {
   IconButton,
   Avatar,
   AvatarGroup,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -91,6 +94,7 @@ function BuildDetailPage({ onToggleTheme }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageUrl, setZoomImageUrl] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     const fetchBuild = async () => {
@@ -204,6 +208,19 @@ function BuildDetailPage({ onToggleTheme }) {
   const handleCloseZoomModal = () => {
     setZoomModalOpen(false);
     setZoomImageUrl('');
+  };
+
+  const handleCopyLink = () => {
+    const shareUrl = `${window.location.origin}/build/${id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   // Calculate event status based on dates
@@ -488,6 +505,22 @@ function BuildDetailPage({ onToggleTheme }) {
                       <FaDiscord style={{ fontSize: '1.2rem' }} />
                     </IconButton>
                   )}
+                  <IconButton
+                    size='small'
+                    onClick={handleCopyLink}
+                    sx={{
+                      padding: '4px',
+                      color: 'text.primary',
+                      '&:hover': {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(255, 255, 255, 0.1)'
+                            : 'rgba(0, 0, 0, 0.1)',
+                      },
+                    }}
+                  >
+                    <LinkIcon sx={{ fontSize: '1.5rem' }} />
+                  </IconButton>
                 </Box>
               </Box>
             </Box>
@@ -689,6 +722,22 @@ function BuildDetailPage({ onToggleTheme }) {
         imageUrl={zoomImageUrl}
         imageName={build?.title}
       />
+
+      {/* Snackbar for copy link notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity='success'
+          sx={{ width: '100%' }}
+        >
+          Share link successfully copied!
+        </Alert>
+      </Snackbar>
     </>
   );
 }
