@@ -224,16 +224,16 @@ function CardModal({ open, onClose, item }) {
         <CloseIcon />
       </IconButton>
 
-      <DialogTitle sx={{ pb: 1 }}>
+      <DialogTitle sx={{ pb: 2 }}>
         <Typography variant='h5' component='div'>
           {item.title}
         </Typography>
       </DialogTitle>
 
-      <DialogContent sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 2 } }}>
+      <DialogContent sx={{ px: { xs: 2, sm: 3 }, pt: 0, pb: { xs: 2, sm: 2 } }}>
         {/* Event Status & Builder Spotlight Pills */}
         {(eventStatus || item.spotlightDate) && (
-          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 0.5, mb: 1.5, flexWrap: 'wrap' }}>
             {/* Event Status Pill - Only for event cards */}
             {item.cardType === 'event' && eventStatus && (
               <Chip
@@ -285,7 +285,7 @@ function CardModal({ open, onClose, item }) {
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            mb: 2,
+            mb: 1.5,
             flexWrap: 'wrap',
           }}
         >
@@ -294,9 +294,9 @@ function CardModal({ open, onClose, item }) {
             (item.builds && item.builds.length > 0)) && (
             <Stack
               direction='row'
-              spacing={1}
+              spacing={0.5}
               flexWrap='wrap'
-              sx={{ gap: 1, flex: 1 }}
+              sx={{ gap: 0.5, flex: 1 }}
             >
               {item.regions &&
                 item.regions.map((region) => (
@@ -375,10 +375,19 @@ function CardModal({ open, onClose, item }) {
                   backgroundColor: '#FF0000',
                   '&:hover': { backgroundColor: '#CC0000' },
                   borderRadius: '50px',
-                  px: 3,
+                  px: { xs: 1.5, sm: 3 },
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  '& .MuiButton-startIcon': {
+                    margin: { xs: 0, sm: '0 8px 0 -4px' },
+                  },
                 }}
               >
-                YouTube
+                <Box
+                  component='span'
+                  sx={{ display: { xs: 'none', sm: 'inline' } }}
+                >
+                  YouTube
+                </Box>
               </Button>
             )}
             {item.discordLink && (
@@ -390,10 +399,19 @@ function CardModal({ open, onClose, item }) {
                   backgroundColor: '#5865F2',
                   '&:hover': { backgroundColor: '#4752C4' },
                   borderRadius: '50px',
-                  px: 3,
+                  px: { xs: 1.5, sm: 3 },
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  '& .MuiButton-startIcon': {
+                    margin: { xs: 0, sm: '0 8px 0 -4px' },
+                  },
                 }}
               >
-                Discord
+                <Box
+                  component='span'
+                  sx={{ display: { xs: 'none', sm: 'inline' } }}
+                >
+                  Discord
+                </Box>
               </Button>
             )}
             <Button
@@ -407,7 +425,8 @@ function CardModal({ open, onClose, item }) {
                     : 'rgba(0, 0, 0, 0.08)',
                 color: 'text.primary',
                 borderRadius: '50px',
-                px: 3,
+                px: { xs: 1.5, sm: 3 },
+                minWidth: { xs: 'auto', sm: 'auto' },
                 boxShadow: 'none',
                 '&:hover': {
                   backgroundColor: (theme) =>
@@ -416,9 +435,17 @@ function CardModal({ open, onClose, item }) {
                       : 'rgba(0, 0, 0, 0.15)',
                   boxShadow: 'none',
                 },
+                '& .MuiButton-startIcon': {
+                  margin: { xs: 0, sm: '0 8px 0 -4px' },
+                },
               }}
             >
-              Share
+              <Box
+                component='span'
+                sx={{ display: { xs: 'none', sm: 'inline' } }}
+              >
+                Share
+              </Box>
             </Button>
             <Button
               variant='contained'
@@ -431,7 +458,8 @@ function CardModal({ open, onClose, item }) {
                     : 'rgba(0, 0, 0, 0.08)',
                 color: 'text.primary',
                 borderRadius: '50px',
-                px: 3,
+                px: { xs: 1.5, sm: 3 },
+                minWidth: { xs: 'auto', sm: 'auto' },
                 boxShadow: 'none',
                 '&:hover': {
                   backgroundColor: (theme) =>
@@ -440,10 +468,18 @@ function CardModal({ open, onClose, item }) {
                       : 'rgba(0, 0, 0, 0.15)',
                   boxShadow: 'none',
                 },
+                '& .MuiButton-startIcon': {
+                  margin: { xs: 0, sm: '0 8px 0 -4px' },
+                },
               }}
               title='Open in page'
             >
-              View
+              <Box
+                component='span'
+                sx={{ display: { xs: 'none', sm: 'inline' } }}
+              >
+                View
+              </Box>
             </Button>
           </Box>
         </Box>
@@ -452,14 +488,14 @@ function CardModal({ open, onClose, item }) {
         <Typography
           variant='body1'
           color='text.primary'
-          sx={{ mb: 3, fontWeight: 300 }}
+          sx={{ mb: 2, fontWeight: 300 }}
         >
           <DescriptionWithLinks description={item.description} />
         </Typography>
 
         {/* Image Gallery */}
         {allImages.length > 0 && (
-          <Box sx={{ position: 'relative', mb: 2 }}>
+          <Box sx={{ position: 'relative', mb: 1.5 }}>
             {/* Main Image Display */}
             <Box
               sx={{
@@ -555,7 +591,7 @@ function CardModal({ open, onClose, item }) {
                 sx={{
                   display: 'flex',
                   gap: 1,
-                  mt: 2,
+                  mt: 1.5,
                   overflowX: 'auto',
                   pb: 1,
                   '&::-webkit-scrollbar': {
@@ -614,7 +650,7 @@ function CardModal({ open, onClose, item }) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mt: 3,
+            mt: 2,
             pt: 2,
             borderTop: 1,
             borderColor: 'divider',

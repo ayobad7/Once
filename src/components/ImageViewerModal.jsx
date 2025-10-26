@@ -55,33 +55,16 @@ function ImageViewerModal({ open, onClose, imageUrl, imageName }) {
           src={imageUrl}
           alt={imageName || 'Full size view'}
           draggable={false}
+          onClick={onClose}
           style={{
             display: 'block',
             maxWidth: '100%',
             height: 'auto',
             objectFit: 'contain',
             userSelect: 'none',
+            cursor: 'pointer',
           }}
         />
-      </Box>
-
-      {/* Instructions */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          px: 3,
-          py: 1,
-          borderRadius: '20px',
-          fontSize: '0.875rem',
-          zIndex: 10,
-        }}
-      >
-        Click outside image to close
       </Box>
     </Dialog>
   );
