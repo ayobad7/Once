@@ -183,6 +183,32 @@ function EventCard({ item, onClick, showTypePill = false }) {
     setSnackbarOpen(false);
   };
 
+  // Calculate event status based on dates
+  const getEventStatus = () => {
+    if (!item.eventStartDate || !item.eventEndDate) {
+      return null; // No dates set
+    }
+
+    const now = new Date();
+    const startDate = new Date(item.eventStartDate);
+    const endDate = new Date(item.eventEndDate);
+
+    // Set time to start of day for accurate comparison
+    now.setHours(0, 0, 0, 0);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    if (now < startDate) {
+      return { label: 'Upcoming', color: 'info' }; // Blue
+    } else if (now >= startDate && now <= endDate) {
+      return { label: 'Ongoing', color: 'success' }; // Green
+    } else {
+      return { label: 'Event Ended', color: 'default' }; // Gray
+    }
+  };
+
+  const eventStatus = getEventStatus();
+
   return (
     <StyledCard variant='outlined' onClick={onClick} tabIndex={0}>
       {/* Image Section - 40% width on desktop */}
@@ -206,7 +232,32 @@ function EventCard({ item, onClick, showTypePill = false }) {
               aspectRatio: { xs: '16 / 9', md: 'auto' },
             }}
           />
-          {/* Builder Spotlight Chip - Positioned on top-left of image */}
+          {/* Event Status Pill - Positioned on top-left of image */}
+          {eventStatus && (
+            <Chip
+              label={eventStatus.label}
+              size='small'
+              color={eventStatus.color}
+              variant='filled'
+              sx={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                fontWeight: 'bold',
+                fontSize: '0.7rem',
+                height: '22px',
+                border: 'none',
+                boxShadow: 2,
+                color: (theme) =>
+                  theme.palette.mode === 'dark' &&
+                  eventStatus.color !== 'default'
+                    ? '#000'
+                    : undefined,
+              }}
+            />
+          )}
+
+          {/* Builder Spotlight Chip - Positioned below status pill */}
           {item.spotlightDate && (
             <Chip
               icon={
@@ -229,13 +280,13 @@ function EventCard({ item, onClick, showTypePill = false }) {
               color='warning'
               sx={{
                 position: 'absolute',
-                top: 12,
+                top: eventStatus ? 42 : 12, // Position below status if it exists
                 left: 12,
                 fontWeight: 'bold',
                 fontSize: '0.7rem',
                 height: '22px',
                 border: 'none',
-                boxShadow: 'none',
+                boxShadow: 2,
                 '& .MuiChip-icon': {
                   marginLeft: '6px',
                 },

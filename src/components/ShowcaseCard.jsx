@@ -277,7 +277,7 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
                 fontSize: '0.7rem',
                 height: '22px',
                 border: 'none',
-                boxShadow: 'none',
+                boxShadow: 2,
                 '& .MuiChip-icon': {
                   marginLeft: '6px',
                 },

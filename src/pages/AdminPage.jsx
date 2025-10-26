@@ -69,6 +69,8 @@ function AdminPage() {
     builds: [], // Array of selected build chips
     youtubeLink: '', // YouTube video link
     discordLink: '', // Discord server link
+    eventStartDate: '', // Event start date (ISO string)
+    eventEndDate: '', // Event end date (ISO string)
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
@@ -265,6 +267,8 @@ function AdminPage() {
         builds: formData.builds, // Add the builds chips
         youtubeLink: formData.youtubeLink, // YouTube link
         discordLink: formData.discordLink, // Discord link
+        eventStartDate: formData.eventStartDate || null, // Event start date
+        eventEndDate: formData.eventEndDate || null, // Event end date
       };
 
       if (isEditing && editingId) {
@@ -295,6 +299,8 @@ function AdminPage() {
         builds: [], // Reset builds
         youtubeLink: '',
         discordLink: '',
+        eventStartDate: '',
+        eventEndDate: '',
       }); // Reset form
       loadGalleryItems(); // Refresh the list
     } catch (error) {
@@ -357,6 +363,8 @@ function AdminPage() {
       builds: item.builds || [],
       youtubeLink: item.youtubeLink || '',
       discordLink: item.discordLink || '',
+      eventStartDate: item.eventStartDate || '',
+      eventEndDate: item.eventEndDate || '',
     });
     setIsEditing(true);
     setEditingId(item.id);
@@ -378,6 +386,8 @@ function AdminPage() {
       builds: [],
       youtubeLink: '',
       discordLink: '',
+      eventStartDate: '',
+      eventEndDate: '',
     });
     setMessage('');
   };
@@ -680,6 +690,47 @@ function AdminPage() {
                 ),
               }}
             />
+
+            {/* Event Date Fields - Only shown for Event card type */}
+            {formData.cardType === 'event' && (
+              <Box sx={{ mt: 3 }}>
+                <FormLabel component='legend' sx={{ mb: 2 }}>
+                  Event Dates (Optional)
+                </FormLabel>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <TextField
+                    label='Start Date'
+                    name='eventStartDate'
+                    type='date'
+                    value={formData.eventStartDate}
+                    onChange={handleInputChange}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{ flex: 1, minWidth: '200px' }}
+                  />
+                  <TextField
+                    label='End Date'
+                    name='eventEndDate'
+                    type='date'
+                    value={formData.eventEndDate}
+                    onChange={handleInputChange}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{ flex: 1, minWidth: '200px' }}
+                  />
+                </Box>
+                <Typography
+                  variant='caption'
+                  color='text.secondary'
+                  sx={{ mt: 1, display: 'block' }}
+                >
+                  Leave empty for no status badge. Status will automatically
+                  update based on dates.
+                </Typography>
+              </Box>
+            )}
 
             {/* Additional Images - Full width like title */}
             <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
