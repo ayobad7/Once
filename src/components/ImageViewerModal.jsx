@@ -59,6 +59,8 @@ function ImageViewerModal({ open, onClose, imageUrl, imageName }) {
           style={{
             display: 'block',
             maxWidth: '100%',
+            maxHeight: '100%',
+            width: 'auto',
             height: 'auto',
             objectFit: 'contain',
             userSelect: 'none',
