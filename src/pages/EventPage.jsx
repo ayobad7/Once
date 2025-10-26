@@ -8,7 +8,12 @@ import {
   Alert,
   Box,
   Pagination,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 import { db } from '../firebase';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import AppAppBar from '../components/AppAppBar';
@@ -26,6 +31,7 @@ function EventPage({ onToggleTheme }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch all event cards
   useEffect(() => {
@@ -56,11 +62,26 @@ function EventPage({ onToggleTheme }) {
     fetchEventCards();
   }, []);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(eventCards.length / ITEMS_PER_PAGE);
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Filter cards based on search query
+  const filteredCards = eventCards.filter((item) => {
+    if (searchQuery.trim() === '') return true;
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      item.title?.toLowerCase().includes(searchLower) ||
+      item.description?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Calculate pagination on filtered results
+  const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentCards = eventCards.slice(startIndex, endIndex);
+  const currentCards = filteredCards.slice(startIndex, endIndex);
 
   // Function to handle page change
   const handlePageChange = (event, value) => {
@@ -102,12 +123,58 @@ function EventPage({ onToggleTheme }) {
       <AppAppBar onToggleTheme={onToggleTheme} />
       <MainContent>
         <Container maxWidth='lg' sx={{ pt: 12, pb: 4 }}>
-          <Typography variant='h1' component='h1' gutterBottom>
-            Events
-          </Typography>
-          <Typography variant='body1' gutterBottom sx={{ mb: 4 }}>
-            Browse all our events and community activities
-          </Typography>
+          {/* Header with Search Bar */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 4,
+              gap: 3,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Box>
+              <Typography variant='h1' component='h1' gutterBottom>
+                Events
+              </Typography>
+              <Typography variant='body1' gutterBottom>
+                Browse all our events and community activities
+              </Typography>
+            </Box>
+
+            {/* Search Bar */}
+            <TextField
+              size='medium'
+              placeholder='Search...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position='end'>
+                    <IconButton
+                      size='small'
+                      onClick={() => setSearchQuery('')}
+                      edge='end'
+                    >
+                      <CloseIcon fontSize='small' />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                minWidth: { xs: '100%', sm: '350px' },
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '50px',
+                },
+              }}
+            />
+          </Box>
 
           <Grid container spacing={2}>
             {currentCards.map((item) => (
@@ -117,9 +184,11 @@ function EventPage({ onToggleTheme }) {
             ))}
           </Grid>
 
-          {eventCards.length === 0 && (
+          {filteredCards.length === 0 && (
             <Typography variant='body1' align='center' sx={{ mt: 4 }}>
-              No event items yet.
+              {searchQuery.trim() !== ''
+                ? `No event items match "${searchQuery}"`
+                : 'No event items yet.'}
             </Typography>
           )}
 
