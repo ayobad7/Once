@@ -60,3 +60,4 @@ function AboutPage({ onToggleTheme }) {
 }
 
 export default AboutPage;
+

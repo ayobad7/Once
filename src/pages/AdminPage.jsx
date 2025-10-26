@@ -654,7 +654,6 @@ function AdminPage() {
               onChange={handleInputChange}
               margin='normal'
               placeholder='https://youtube.com/...'
-              helperText='Add a YouTube video link'
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -671,7 +670,6 @@ function AdminPage() {
               onChange={handleInputChange}
               margin='normal'
               placeholder='https://discord.gg/...'
-              helperText='Add a Discord server invite link'
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>

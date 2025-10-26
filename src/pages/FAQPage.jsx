@@ -60,3 +60,4 @@ function FAQPage({ onToggleTheme }) {
 }
 
 export default FAQPage;
+
