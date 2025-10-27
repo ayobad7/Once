@@ -25,18 +25,6 @@ import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import EventIcon from '@mui/icons-material/Event';
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
-import LanguageIcon from '@mui/icons-material/Language'; // Region icon
-import FoundationIcon from '@mui/icons-material/Foundation'; // Base Design
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'; // Room Design
-import LocationCityIcon from '@mui/icons-material/LocationCity'; // City Build
-import PlumbingIcon from '@mui/icons-material/Plumbing'; // Tutorial
-import CheckroomIcon from '@mui/icons-material/Checkroom'; // Outfit
-import PersonSearchIcon from '@mui/icons-material/PersonSearch'; // Character
-import ChairIcon from '@mui/icons-material/Chair'; // Decoration
-import BugReportIcon from '@mui/icons-material/BugReport'; // Bug
-import WhatshotIcon from '@mui/icons-material/Whatshot'; // Weapon Build
-import PetsIcon from '@mui/icons-material/Pets'; // Deviation
-import UpdateIcon from '@mui/icons-material/Update'; // Update & Class
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AppAppBar from '../components/AppAppBar';
@@ -44,47 +32,11 @@ import MainContent from '../components/MainContent';
 import Footer from '../components/Footer';
 import DescriptionWithLinks from '../components/DescriptionWithLinks';
 import ImageViewerModal from '../components/ImageViewerModal';
-
-// Color mappings (same as CardModal)
-const regionColors = {
-  'North America': 'error',
-  Europe: 'info',
-  'South America': 'warning',
-  'Southeast Asia': 'success',
-  'Other Regions': 'secondary',
-  'Custom Server': 'primary',
-};
-
-const buildColors = {
-  'Base Design': 'error',
-  'Room Design': 'secondary',
-  'City Build': 'primary',
-  Tutorial: 'info',
-  Outfit: 'primary',
-  Character: 'warning',
-  Decoration: 'success',
-  Bug: 'error',
-  'Weapon Build': 'secondary',
-  Deviation: 'warning',
-  Update: 'info',
-  Class: 'success',
-};
-
-// Icon mappings for build categories
-const buildIcons = {
-  'Base Design': FoundationIcon,
-  'Room Design': MeetingRoomIcon,
-  'City Build': LocationCityIcon,
-  Tutorial: PlumbingIcon,
-  Outfit: CheckroomIcon,
-  Character: PersonSearchIcon,
-  Decoration: ChairIcon,
-  Bug: BugReportIcon,
-  'Weapon Build': WhatshotIcon,
-  Deviation: PetsIcon,
-  Update: UpdateIcon,
-  Class: UpdateIcon,
-};
+import RegionChip from '../components/chips/RegionChip';
+import CategoryChip from '../components/chips/CategoryChip';
+import DaysRemainingChip from '../components/chips/DaysRemainingChip';
+import EventStatusChip from '../components/chips/EventStatusChip';
+import { getEventStatus, getDaysRemaining } from '../utils/cardUtils';
 
 function BuildDetailPage({ onToggleTheme }) {
   const { id } = useParams();
@@ -223,29 +175,13 @@ function BuildDetailPage({ onToggleTheme }) {
     setSnackbarOpen(false);
   };
 
-  // Calculate event status based on dates
-  const getEventStatus = () => {
-    if (!build || !build.eventStartDate || !build.eventEndDate) return null;
-
-    const today = new Date();
-    const startDate = new Date(build.eventStartDate);
-    const endDate = new Date(build.eventEndDate);
-
-    // Set time to start of day for accurate comparison
-    today.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
-
-    if (today < startDate) {
-      return { label: 'Upcoming', color: 'info' };
-    } else if (today >= startDate && today <= endDate) {
-      return { label: 'Ongoing', color: 'success' };
-    } else {
-      return { label: 'Event Ended', color: 'default' };
-    }
-  };
-
-  const eventStatus = getEventStatus();
+  // Use shared utility functions
+  const eventStatus = build
+    ? getEventStatus(build.eventStartDate, build.eventEndDate)
+    : null;
+  const daysRemaining = build
+    ? getDaysRemaining(build.eventStartDate, build.eventEndDate)
+    : null;
 
   return (
     <>
@@ -332,25 +268,12 @@ function BuildDetailPage({ onToggleTheme }) {
               />
 
               {/* Event Status Pill - Only for event cards */}
-              {build.cardType === 'event' && eventStatus && (
-                <Chip
-                  label={eventStatus.label}
-                  size='small'
-                  color={eventStatus.color}
-                  variant='filled'
-                  sx={{
-                    mr: 1,
-                    mb: 1,
-                    fontWeight: 'bold',
-                    fontSize: '0.7rem',
-                    height: '22px',
-                    border: 'none',
-                    color: (theme) =>
-                      theme.palette.mode === 'dark' &&
-                      eventStatus.color !== 'default'
-                        ? '#000'
-                        : undefined,
-                  }}
+              {build.cardType === 'event' && (
+                <EventStatusChip
+                  eventStatus={eventStatus}
+                  fontSize='0.7rem'
+                  height='22px'
+                  sx={{ mr: 1, mb: 1 }}
                 />
               )}
 
@@ -410,69 +333,33 @@ function BuildDetailPage({ onToggleTheme }) {
                   flexWrap='wrap'
                   sx={{ gap: 0.5, flex: 1 }}
                 >
+                  {/* Days Remaining Chip - Only for ongoing events */}
+                  <DaysRemainingChip
+                    daysRemaining={daysRemaining}
+                    fontSize='0.65rem'
+                    height='20px'
+                    iconSize='0.75rem'
+                  />
                   {build.regions &&
                     build.regions.map((region) => (
-                      <Chip
+                      <RegionChip
                         key={region}
-                        icon={
-                          <LanguageIcon
-                            sx={{
-                              fontSize: '0.75rem !important',
-                              color: 'inherit !important',
-                            }}
-                          />
-                        }
-                        label={region}
-                        size='small'
-                        color={regionColors[region] || 'default'}
-                        variant='filled'
-                        sx={{
-                          fontSize: '0.65rem',
-                          height: '20px',
-                          border: 'none',
-                          color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#000' : undefined,
-                          '& .MuiChip-icon': {
-                            marginLeft: '6px',
-                          },
-                        }}
+                        region={region}
+                        fontSize='0.65rem'
+                        height='20px'
+                        iconSize='0.75rem'
                       />
                     ))}
                   {build.builds &&
-                    build.builds.map((buildItem) => {
-                      const IconComponent = buildIcons[buildItem];
-                      return (
-                        <Chip
-                          key={buildItem}
-                          icon={
-                            IconComponent ? (
-                              <IconComponent
-                                sx={{
-                                  fontSize: '0.75rem !important',
-                                  color: 'inherit !important',
-                                }}
-                              />
-                            ) : undefined
-                          }
-                          label={buildItem}
-                          size='small'
-                          color={buildColors[buildItem] || 'default'}
-                          variant='filled'
-                          sx={{
-                            fontSize: '0.65rem',
-                            height: '20px',
-                            border: 'none',
-                            color: (theme) =>
-                              theme.palette.mode === 'dark'
-                                ? '#000'
-                                : undefined,
-                            '& .MuiChip-icon': {
-                              marginLeft: '6px',
-                            },
-                          }}
-                        />
-                      );
-                    })}
+                    build.builds.map((buildItem) => (
+                      <CategoryChip
+                        key={buildItem}
+                        category={buildItem}
+                        fontSize='0.65rem'
+                        height='20px'
+                        iconSize='0.75rem'
+                      />
+                    ))}
                 </Stack>
 
                 {/* Right side: Social Icons */}

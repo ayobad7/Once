@@ -24,60 +24,12 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import LinkIcon from '@mui/icons-material/Link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { FaDiscord } from 'react-icons/fa6';
-import LanguageIcon from '@mui/icons-material/Language'; // Region icon
-import FoundationIcon from '@mui/icons-material/Foundation'; // Base Design
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'; // Room Design
-import LocationCityIcon from '@mui/icons-material/LocationCity'; // City Build
-import PlumbingIcon from '@mui/icons-material/Plumbing'; // Tutorial
-import CheckroomIcon from '@mui/icons-material/Checkroom'; // Outfit
-import PersonSearchIcon from '@mui/icons-material/PersonSearch'; // Character
-import ChairIcon from '@mui/icons-material/Chair'; // Decoration
-import BugReportIcon from '@mui/icons-material/BugReport'; // Bug
-import WhatshotIcon from '@mui/icons-material/Whatshot'; // Weapon Build
-import PetsIcon from '@mui/icons-material/Pets'; // Deviation
-import UpdateIcon from '@mui/icons-material/Update'; // Update & Class
 import DescriptionWithLinks from './DescriptionWithLinks';
-
-// MUI theme-aware color mappings for chips
-const regionColors = {
-  'North America': 'error',
-  Europe: 'info',
-  'South America': 'warning',
-  'Southeast Asia': 'success',
-  'Other Regions': 'secondary',
-  'Custom Server': 'primary',
-};
-
-const buildColors = {
-  'Base Design': 'error',
-  'Room Design': 'secondary',
-  'City Build': 'primary',
-  Tutorial: 'info',
-  Outfit: 'primary',
-  Character: 'warning',
-  Decoration: 'success',
-  Bug: 'error',
-  'Weapon Build': 'secondary',
-  Deviation: 'warning',
-  Update: 'info',
-  Class: 'success',
-};
-
-// Icon mappings for build categories
-const buildIcons = {
-  'Base Design': FoundationIcon,
-  'Room Design': MeetingRoomIcon,
-  'City Build': LocationCityIcon,
-  Tutorial: PlumbingIcon,
-  Outfit: CheckroomIcon,
-  Character: PersonSearchIcon,
-  Decoration: ChairIcon,
-  Bug: BugReportIcon,
-  'Weapon Build': WhatshotIcon,
-  Deviation: PetsIcon,
-  Update: UpdateIcon,
-  Class: UpdateIcon,
-};
+import RegionChip from './chips/RegionChip';
+import CategoryChip from './chips/CategoryChip';
+import DaysRemainingChip from './chips/DaysRemainingChip';
+import EventStatusChip from './chips/EventStatusChip';
+import { getEventStatus, getDaysRemaining } from '../utils/cardUtils';
 
 function CardModal({ open, onClose, item }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -111,31 +63,13 @@ function CardModal({ open, onClose, item }) {
     setSnackbarOpen(false);
   };
 
-  // Calculate event status based on dates
-  const getEventStatus = () => {
-    if (!item || !item.eventStartDate || !item.eventEndDate) {
-      return null; // No dates set
-    }
-
-    const now = new Date();
-    const startDate = new Date(item.eventStartDate);
-    const endDate = new Date(item.eventEndDate);
-
-    // Set time to start of day for accurate comparison
-    now.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
-
-    if (now < startDate) {
-      return { label: 'Upcoming', color: 'info' }; // Blue
-    } else if (now >= startDate && now <= endDate) {
-      return { label: 'Ongoing', color: 'success' }; // Green
-    } else {
-      return { label: 'Event Ended', color: 'default' }; // Gray
-    }
-  };
-
-  const eventStatus = getEventStatus();
+  // Use shared utility functions
+  const eventStatus = item
+    ? getEventStatus(item.eventStartDate, item.eventEndDate)
+    : null;
+  const daysRemaining = item
+    ? getDaysRemaining(item.eventStartDate, item.eventEndDate)
+    : null;
 
   if (!item) {
     return (
@@ -235,23 +169,11 @@ function CardModal({ open, onClose, item }) {
         {(eventStatus || item.spotlightDate) && (
           <Box sx={{ display: 'flex', gap: 0.5, mb: 1.5, flexWrap: 'wrap' }}>
             {/* Event Status Pill - Only for event cards */}
-            {item.cardType === 'event' && eventStatus && (
-              <Chip
-                label={eventStatus.label}
-                size='small'
-                color={eventStatus.color}
-                variant='filled'
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '0.7rem',
-                  height: '24px',
-                  border: 'none',
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' &&
-                    eventStatus.color !== 'default'
-                      ? '#000'
-                      : undefined,
-                }}
+            {item.cardType === 'event' && (
+              <EventStatusChip
+                eventStatus={eventStatus}
+                fontSize='0.7rem'
+                height='24px'
               />
             )}
 
@@ -291,76 +213,44 @@ function CardModal({ open, onClose, item }) {
         >
           {/* Chips */}
           {((item.regions && item.regions.length > 0) ||
-            (item.builds && item.builds.length > 0)) && (
+            (item.builds && item.builds.length > 0) ||
+            daysRemaining !== null) && (
             <Stack
               direction='row'
               spacing={0.5}
               flexWrap='wrap'
               sx={{ gap: 0.5, flex: 1 }}
             >
+              {/* Days Remaining Chip - Only for ongoing events */}
+              <DaysRemainingChip
+                daysRemaining={daysRemaining}
+                fontSize='0.75rem'
+                height='24px'
+                iconSize='0.8rem'
+                fontWeight='bold'
+              />
               {item.regions &&
                 item.regions.map((region) => (
-                  <Chip
+                  <RegionChip
                     key={region}
-                    icon={
-                      <LanguageIcon
-                        sx={{
-                          fontSize: '0.8rem !important',
-                          color: 'inherit !important',
-                        }}
-                      />
-                    }
-                    label={region}
-                    size='small'
-                    color={regionColors[region] || 'default'}
-                    variant='filled'
-                    sx={{
-                      fontWeight: 'bold',
-                      fontSize: '0.75rem',
-                      height: '24px',
-                      border: 'none',
-                      color: (theme) =>
-                        theme.palette.mode === 'dark' ? '#000' : undefined,
-                      '& .MuiChip-icon': {
-                        marginLeft: '8px',
-                      },
-                    }}
+                    region={region}
+                    fontSize='0.75rem'
+                    height='24px'
+                    iconSize='0.8rem'
+                    fontWeight='bold'
                   />
                 ))}
               {item.builds &&
-                item.builds.map((build) => {
-                  const IconComponent = buildIcons[build];
-                  return (
-                    <Chip
-                      key={build}
-                      icon={
-                        IconComponent ? (
-                          <IconComponent
-                            sx={{
-                              fontSize: '0.8rem !important',
-                              color: 'inherit !important',
-                            }}
-                          />
-                        ) : undefined
-                      }
-                      label={build}
-                      size='small'
-                      color={buildColors[build] || 'default'}
-                      variant='filled'
-                      sx={{
-                        fontWeight: 'bold',
-                        fontSize: '0.75rem',
-                        height: '24px',
-                        border: 'none',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#000' : undefined,
-                        '& .MuiChip-icon': {
-                          marginLeft: '8px',
-                        },
-                      }}
-                    />
-                  );
-                })}
+                item.builds.map((build) => (
+                  <CategoryChip
+                    key={build}
+                    category={build}
+                    fontSize='0.75rem'
+                    height='24px'
+                    iconSize='0.8rem'
+                    fontWeight='bold'
+                  />
+                ))}
             </Stack>
           )}
 

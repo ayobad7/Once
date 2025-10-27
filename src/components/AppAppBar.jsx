@@ -423,6 +423,104 @@ function AppAppBar({ onToggleTheme }) {
                 </ListItemButton>
               </ListItem>
             </List>
+
+            {/* Social Icons in Mobile Menu */}
+            <Divider sx={{ my: 2 }} />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 1.5,
+                px: 2,
+                pb: 1,
+              }}
+            >
+              <IconButton
+                size='small'
+                href='https://ko-fi.com/oncearchitect'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  '&:hover': {
+                    color: '#FF5E5B',
+                    borderColor: '#FF5E5B',
+                  },
+                }}
+                aria-label='Ko-fi'
+              >
+                <SiKofi style={{ fontSize: '1.2rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://x.com/jesstronbuilds'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  '&:hover': {
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? '#fff' : '#000',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark' ? '#fff' : '#000',
+                  },
+                }}
+                aria-label='Twitter/X'
+              >
+                <FaXTwitter style={{ fontSize: '1.2rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://www.youtube.com/@jesstronbuilding'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  '&:hover': {
+                    color: '#FF0000',
+                    borderColor: '#FF0000',
+                  },
+                }}
+                aria-label='YouTube'
+              >
+                <YouTubeIcon sx={{ fontSize: '1.4rem' }} />
+              </IconButton>
+
+              <IconButton
+                size='small'
+                href='https://discord.com/invite/vRHTtVqKpT'
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{
+                  color: 'inherit',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  '&:hover': {
+                    color: '#5865F2',
+                    borderColor: '#5865F2',
+                  },
+                }}
+                aria-label='Discord'
+              >
+                <FaDiscord style={{ fontSize: '1.2rem' }} />
+              </IconButton>
+            </Box>
           </Box>
         </Drawer>
       </nav>

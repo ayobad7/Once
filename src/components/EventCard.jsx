@@ -19,61 +19,12 @@ import LinkIcon from '@mui/icons-material/Link';
 import { FaDiscord } from 'react-icons/fa6';
 import EventIcon from '@mui/icons-material/Event'; // Event icon
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spotlight icon
-import TimerIcon from '@mui/icons-material/Timer'; // Days left icon
-import LanguageIcon from '@mui/icons-material/Language'; // Region icon
-import FoundationIcon from '@mui/icons-material/Foundation'; // Base Design
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'; // Room Design
-import LocationCityIcon from '@mui/icons-material/LocationCity'; // City Build
-import PlumbingIcon from '@mui/icons-material/Plumbing'; // Tutorial
-import CheckroomIcon from '@mui/icons-material/Checkroom'; // Outfit
-import PersonSearchIcon from '@mui/icons-material/PersonSearch'; // Character
-import ChairIcon from '@mui/icons-material/Chair'; // Decoration
-import BugReportIcon from '@mui/icons-material/BugReport'; // Bug
-import WhatshotIcon from '@mui/icons-material/Whatshot'; // Weapon Build
-import PetsIcon from '@mui/icons-material/Pets'; // Deviation
-import UpdateIcon from '@mui/icons-material/Update'; // Update & Class
 import DescriptionWithLinks from './DescriptionWithLinks';
-
-// Color mappings for chips
-const regionColors = {
-  'North America': 'error',
-  Europe: 'info',
-  'South America': 'warning',
-  'Southeast Asia': 'success',
-  'Other Regions': 'secondary',
-  'Custom Server': 'primary',
-};
-
-const buildColors = {
-  'Base Design': 'error',
-  'Room Design': 'secondary',
-  'City Build': 'primary',
-  Tutorial: 'info',
-  Outfit: 'primary',
-  Character: 'warning',
-  Decoration: 'success',
-  Bug: 'error',
-  'Weapon Build': 'secondary',
-  Deviation: 'warning',
-  Update: 'info',
-  Class: 'success',
-};
-
-// Icon mappings for categories
-const buildIcons = {
-  'Base Design': FoundationIcon,
-  'Room Design': MeetingRoomIcon,
-  'City Build': LocationCityIcon,
-  Tutorial: PlumbingIcon,
-  Outfit: CheckroomIcon,
-  Character: PersonSearchIcon,
-  Decoration: ChairIcon,
-  Bug: BugReportIcon,
-  'Weapon Build': WhatshotIcon,
-  Deviation: PetsIcon,
-  Update: UpdateIcon,
-  Class: UpdateIcon,
-};
+import RegionChip from './chips/RegionChip';
+import CategoryChip from './chips/CategoryChip';
+import DaysRemainingChip from './chips/DaysRemainingChip';
+import EventStatusChip from './chips/EventStatusChip';
+import { getEventStatus, getDaysRemaining } from '../utils/cardUtils';
 
 // Styled Card - Horizontal Layout
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -185,49 +136,12 @@ function EventCard({ item, onClick, showTypePill = false }) {
   };
 
   // Calculate event status based on dates
-  const getEventStatus = () => {
-    if (!item.eventStartDate || !item.eventEndDate) {
-      return null; // No dates set
-    }
-
-    const now = new Date();
-    const startDate = new Date(item.eventStartDate);
-    const endDate = new Date(item.eventEndDate);
-
-    // Set time to start of day for accurate comparison
-    now.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
-
-    if (now < startDate) {
-      return { label: 'Upcoming', color: 'info' }; // Blue
-    } else if (now >= startDate && now <= endDate) {
-      return { label: 'Ongoing', color: 'success' }; // Green
-    } else {
-      return { label: 'Event Ended', color: 'default' }; // Gray
-    }
-  };
-
-  // Calculate days remaining for ongoing events
-  const getDaysRemaining = () => {
-    if (!item.eventEndDate || !eventStatus || eventStatus.label !== 'Ongoing') {
-      return null;
-    }
-
-    const now = new Date();
-    const endDate = new Date(item.eventEndDate);
-
-    now.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
-
-    const timeDiff = endDate.getTime() - now.getTime();
-    const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-    return daysLeft > 0 ? daysLeft : 0;
-  };
-
-  const eventStatus = getEventStatus();
-  const daysRemaining = getDaysRemaining();
+  // Use shared utility functions
+  const eventStatus = getEventStatus(item.eventStartDate, item.eventEndDate);
+  const daysRemaining = getDaysRemaining(
+    item.eventStartDate,
+    item.eventEndDate
+  );
 
   return (
     <StyledCard variant='outlined' onClick={onClick} tabIndex={0}>
@@ -253,29 +167,17 @@ function EventCard({ item, onClick, showTypePill = false }) {
             }}
           />
           {/* Event Status Pill - Positioned on top-left of image */}
-          {eventStatus && (
-            <Chip
-              label={eventStatus.label}
-              size='small'
-              color={eventStatus.color}
-              variant='filled'
-              sx={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                fontWeight: 'bold',
-                fontSize: '0.7rem',
-                height: '22px',
-                border: 'none',
-                boxShadow: 2,
-                color: (theme) =>
-                  theme.palette.mode === 'dark' &&
-                  eventStatus.color !== 'default'
-                    ? '#000'
-                    : undefined,
-              }}
-            />
-          )}
+          <EventStatusChip
+            eventStatus={eventStatus}
+            fontSize='0.7rem'
+            height='22px'
+            sx={{
+              position: 'absolute',
+              top: 12,
+              left: 12,
+              boxShadow: 2,
+            }}
+          />
 
           {/* Builder Spotlight Chip - Positioned below status pill */}
           {item.spotlightDate && (
@@ -367,95 +269,36 @@ function EventCard({ item, onClick, showTypePill = false }) {
               sx={{ gap: 0.5, flex: 1 }}
             >
               {/* Days Remaining Chip - Only for ongoing events */}
-              {daysRemaining !== null && (
-                <Chip
-                  icon={
-                    <TimerIcon
-                      sx={{
-                        fontSize: '0.75rem !important',
-                        color: 'inherit !important',
-                      }}
-                    />
-                  }
-                  label={`${daysRemaining} ${
-                    daysRemaining === 1 ? 'day' : 'days'
-                  } left`}
-                  size='small'
-                  color='warning'
-                  variant='filled'
-                  sx={{
-                    fontSize: '0.65rem',
-                    height: '20px',
-                    border: 'none',
-                    color: (theme) =>
-                      theme.palette.mode === 'dark' ? '#000' : undefined,
-                    '& .MuiChip-icon': {
-                      marginLeft: '6px',
-                    },
-                  }}
-                />
-              )}
+              <DaysRemainingChip
+                daysRemaining={daysRemaining}
+                fontSize='0.65rem'
+                height='20px'
+                iconSize='0.75rem'
+              />
               {item.regions &&
-                item.regions.slice(0, 2).map((region) => (
-                  <Chip
-                    key={region}
-                    icon={
-                      <LanguageIcon
-                        sx={{
-                          fontSize: '0.75rem !important',
-                          color: 'inherit !important',
-                        }}
-                      />
-                    }
-                    label={region}
-                    size='small'
-                    color={regionColors[region] || 'default'}
-                    variant='filled'
-                    sx={{
-                      fontSize: '0.65rem',
-                      height: '20px',
-                      border: 'none',
-                      color: (theme) =>
-                        theme.palette.mode === 'dark' ? '#000' : undefined,
-                      '& .MuiChip-icon': {
-                        marginLeft: '6px',
-                      },
-                    }}
-                  />
-                ))}
-              {item.builds &&
-                item.builds.slice(0, 2).map((build) => {
-                  const IconComponent = buildIcons[build];
-                  return (
-                    <Chip
-                      key={build}
-                      icon={
-                        IconComponent ? (
-                          <IconComponent
-                            sx={{
-                              fontSize: '0.75rem !important',
-                              color: 'inherit !important',
-                            }}
-                          />
-                        ) : undefined
-                      }
-                      label={build}
-                      size='small'
-                      color={buildColors[build] || 'default'}
-                      variant='filled'
-                      sx={{
-                        fontSize: '0.65rem',
-                        height: '20px',
-                        border: 'none',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#000' : undefined,
-                        '& .MuiChip-icon': {
-                          marginLeft: '6px',
-                        },
-                      }}
+                item.regions
+                  .slice(0, 2)
+                  .map((region) => (
+                    <RegionChip
+                      key={region}
+                      region={region}
+                      fontSize='0.65rem'
+                      height='20px'
+                      iconSize='0.75rem'
                     />
-                  );
-                })}
+                  ))}
+              {item.builds &&
+                item.builds
+                  .slice(0, 2)
+                  .map((build) => (
+                    <CategoryChip
+                      key={build}
+                      category={build}
+                      fontSize='0.65rem'
+                      height='20px'
+                      iconSize='0.75rem'
+                    />
+                  ))}
               {(item.regions?.length > 2 || item.builds?.length > 2) && (
                 <Typography
                   variant='caption'
