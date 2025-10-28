@@ -47,6 +47,7 @@ import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { db } from '../firebase'; // Adjust path if needed
+import ImageUpload from '../components/ImageUpload'; // Cloudinary image upload
 import {
   collection,
   addDoc,
@@ -582,16 +583,25 @@ function AdminPage() {
                 ref={descriptionRef}
               />
             </Box>
-            <TextField
-              fullWidth
-              label='Main Image URL'
-              name='imageUrl'
-              value={formData.imageUrl}
-              onChange={handleInputChange}
-              margin='normal'
-              required
-              placeholder='Paste the direct link to your main image'
-            />
+
+            {/* Main Image Upload */}
+            <Box sx={{ mt: 3 }}>
+              <FormLabel component='legend' sx={{ mb: 2 }}>
+                Main Image *
+              </FormLabel>
+              <ImageUpload
+                label='Upload Main Image'
+                multiple={false}
+                onUploadComplete={(url) => {
+                  setFormData({ ...formData, imageUrl: url });
+                }}
+              />
+              {formData.imageUrl && (
+                <Alert severity='success' sx={{ mt: 2 }}>
+                  Main image set: {formData.imageUrl.substring(0, 60)}...
+                </Alert>
+              )}
+            </Box>
 
             {/* Region Chips */}
             <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
@@ -733,26 +743,34 @@ function AdminPage() {
             )}
 
             {/* Additional Images - Full width like title */}
-            <FormControl component='fieldset' sx={{ mt: 3 }} fullWidth>
-              <FormLabel component='legend'>
+            <Box sx={{ mt: 3 }}>
+              <FormLabel component='legend' sx={{ mb: 2 }}>
                 Additional Images (Up to 8)
               </FormLabel>
-              <FormGroup>
-                {[...Array(8)].map((_, index) => (
-                  <TextField
-                    key={index}
-                    fullWidth
-                    type='text'
-                    value={formData.additionalImages[index] || ''}
-                    onChange={(e) =>
-                      handleAdditionalImageChange(index, e.target.value)
+              <ImageUpload
+                label='Upload Additional Images (Gallery)'
+                multiple={true}
+                onUploadComplete={(urls) => {
+                  const newAdditionalImages = [...formData.additionalImages];
+                  // Add new URLs to existing ones (up to 8 total)
+                  urls.forEach((url) => {
+                    if (newAdditionalImages.length < 8) {
+                      newAdditionalImages.push(url);
                     }
-                    placeholder={`Additional Image ${index + 1} URL`}
-                    sx={{ mt: 1 }}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
+                  });
+                  setFormData({
+                    ...formData,
+                    additionalImages: newAdditionalImages,
+                  });
+                }}
+              />
+              {formData.additionalImages.length > 0 && (
+                <Alert severity='info' sx={{ mt: 2 }}>
+                  {formData.additionalImages.length} additional image(s)
+                  uploaded
+                </Alert>
+              )}
+            </Box>
             <Button
               type='submit'
               variant='contained'
