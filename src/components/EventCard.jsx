@@ -8,10 +8,10 @@ import {
   Box,
   Avatar,
   Chip,
-  Stack,
   IconButton,
   Snackbar,
   Alert,
+  useTheme,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -24,7 +24,11 @@ import RegionChip from './chips/RegionChip';
 import CategoryChip from './chips/CategoryChip';
 import DaysRemainingChip from './chips/DaysRemainingChip';
 import EventStatusChip from './chips/EventStatusChip';
-import { getEventStatus, getDaysRemaining } from '../utils/cardUtils';
+import {
+  getEventStatus,
+  getDaysRemaining,
+  pastelColors,
+} from '../utils/cardUtils';
 
 // Styled Card - Horizontal Layout
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -33,7 +37,10 @@ const StyledCard = styled(Card)(({ theme }) => ({
   padding: 0,
   height: '100%',
   minHeight: '200px',
-  backgroundColor: (theme.vars || theme).palette.background.paper,
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? (theme.vars || theme).palette.background.paper
+      : '#ffffff',
   '&:hover': {
     backgroundColor: 'transparent',
     cursor: 'pointer',
@@ -120,6 +127,8 @@ function Author({ email, timestamp }) {
 
 function EventCard({ item, onClick, showTypePill = false }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const theme = useTheme();
+  const mode = theme.palette.mode;
 
   const handleCopyLink = (e) => {
     e.stopPropagation();
@@ -142,6 +151,10 @@ function EventCard({ item, onClick, showTypePill = false }) {
     item.eventStartDate,
     item.eventEndDate
   );
+
+  // Pastel colors for Builder Spotlight and Event type pills
+  const spotlightColors = pastelColors.orange[mode];
+  const eventTypeColors = pastelColors.yellow[mode];
 
   return (
     <StyledCard variant='outlined' onClick={onClick} tabIndex={0}>
@@ -199,7 +212,6 @@ function EventCard({ item, onClick, showTypePill = false }) {
                   : 'Featured'
               }`}
               size='small'
-              color='warning'
               sx={{
                 position: 'absolute',
                 top: eventStatus ? 42 : 12, // Position below status pill
@@ -208,9 +220,15 @@ function EventCard({ item, onClick, showTypePill = false }) {
                 fontSize: '0.7rem',
                 height: '22px',
                 border: 'none',
+                backgroundColor: spotlightColors.bg,
+                color: spotlightColors.text,
                 boxShadow: 2,
+                '& .MuiChip-label': {
+                  color: spotlightColors.text,
+                },
                 '& .MuiChip-icon': {
                   marginLeft: '6px',
+                  color: spotlightColors.text,
                 },
               }}
             />
@@ -234,19 +252,21 @@ function EventCard({ item, onClick, showTypePill = false }) {
               }
               label='Event'
               size='small'
-              color='warning'
-              variant='filled'
               sx={{
                 alignSelf: 'flex-start',
                 fontWeight: 'bold',
                 fontSize: '0.65rem',
                 height: '22px',
                 border: 'none',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? '#000' : undefined,
+                backgroundColor: eventTypeColors.bg,
+                color: eventTypeColors.text,
                 mb: 1,
+                '& .MuiChip-label': {
+                  color: eventTypeColors.text,
+                },
                 '& .MuiChip-icon': {
                   marginLeft: '6px',
+                  color: eventTypeColors.text,
                 },
               }}
             />
@@ -262,11 +282,15 @@ function EventCard({ item, onClick, showTypePill = false }) {
               mb: 1,
             }}
           >
-            <Stack
-              direction='row'
-              spacing={0.5}
-              flexWrap='wrap'
-              sx={{ gap: 0.5, flex: 1 }}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 1,
+                alignItems: 'center',
+                flex: 1,
+              }}
             >
               {/* Days Remaining Chip - Only for ongoing events */}
               <DaysRemainingChip
@@ -300,15 +324,12 @@ function EventCard({ item, onClick, showTypePill = false }) {
                     />
                   ))}
               {(item.regions?.length > 2 || item.builds?.length > 2) && (
-                <Typography
-                  variant='caption'
-                  sx={{ ml: 0.5, alignSelf: 'center' }}
-                >
+                <Typography variant='caption' sx={{ alignSelf: 'center' }}>
                   +
                   {(item.regions?.length || 0) + (item.builds?.length || 0) - 4}
                 </Typography>
               )}
-            </Stack>
+            </Box>
 
             {/* YouTube, Discord, and Share Link Icons */}
             <Box sx={{ display: 'flex', gap: 0.5 }}>

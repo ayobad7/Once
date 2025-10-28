@@ -14,6 +14,7 @@ import {
   AvatarGroup,
   Snackbar,
   Alert,
+  useTheme,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -36,17 +37,30 @@ import RegionChip from '../components/chips/RegionChip';
 import CategoryChip from '../components/chips/CategoryChip';
 import DaysRemainingChip from '../components/chips/DaysRemainingChip';
 import EventStatusChip from '../components/chips/EventStatusChip';
-import { getEventStatus, getDaysRemaining } from '../utils/cardUtils';
+import {
+  getEventStatus,
+  getDaysRemaining,
+  pastelColors,
+} from '../utils/cardUtils';
 
 function BuildDetailPage({ onToggleTheme }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
   const [build, setBuild] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [zoomModalOpen, setZoomModalOpen] = useState(false);
   const [zoomImageUrl, setZoomImageUrl] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Pastel colors for Builder Spotlight and card type pills
+  const spotlightColors = pastelColors.orange[mode];
+  const showcaseColors = pastelColors.red[mode];
+  const galleryColors = pastelColors.blue[mode];
+  const eventColors = pastelColors.yellow[mode];
 
   useEffect(() => {
     const fetchBuild = async () => {
@@ -212,60 +226,67 @@ function BuildDetailPage({ onToggleTheme }) {
             {/* Chips Section */}
             <Box sx={{ mb: 3 }}>
               {/* Card Type Pill */}
-              <Chip
-                icon={
-                  build.cardType === 'showcase' ? (
-                    <ViewCarouselIcon
-                      sx={{
-                        fontSize: '0.85rem !important',
-                        color: 'inherit !important',
-                      }}
-                    />
-                  ) : build.cardType === 'gallery' ? (
-                    <CollectionsIcon
-                      sx={{
-                        fontSize: '0.85rem !important',
-                        color: 'inherit !important',
-                      }}
-                    />
-                  ) : (
-                    <EventIcon
-                      sx={{
-                        fontSize: '0.85rem !important',
-                        color: 'inherit !important',
-                      }}
-                    />
-                  )
-                }
-                label={
+              {(() => {
+                const typeColors =
                   build.cardType === 'showcase'
-                    ? 'Showcase'
+                    ? showcaseColors
                     : build.cardType === 'gallery'
-                    ? 'Gallery'
-                    : 'Event'
-                }
-                size='small'
-                color={
-                  build.cardType === 'showcase'
-                    ? 'error'
-                    : build.cardType === 'gallery'
-                    ? 'info'
-                    : 'warning'
-                }
-                variant='filled'
-                sx={{
-                  mr: 1,
-                  mb: 1,
-                  fontSize: '0.65rem',
-                  height: '22px',
-                  border: 'none',
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? '#000' : undefined,
-                  '& .MuiChip-icon': {
-                    marginLeft: '6px',
-                  },
-                }}
-              />
+                    ? galleryColors
+                    : eventColors;
+
+                return (
+                  <Chip
+                    icon={
+                      build.cardType === 'showcase' ? (
+                        <ViewCarouselIcon
+                          sx={{
+                            fontSize: '0.85rem !important',
+                            color: 'inherit !important',
+                          }}
+                        />
+                      ) : build.cardType === 'gallery' ? (
+                        <CollectionsIcon
+                          sx={{
+                            fontSize: '0.85rem !important',
+                            color: 'inherit !important',
+                          }}
+                        />
+                      ) : (
+                        <EventIcon
+                          sx={{
+                            fontSize: '0.85rem !important',
+                            color: 'inherit !important',
+                          }}
+                        />
+                      )
+                    }
+                    label={
+                      build.cardType === 'showcase'
+                        ? 'Showcase'
+                        : build.cardType === 'gallery'
+                        ? 'Gallery'
+                        : 'Event'
+                    }
+                    size='small'
+                    sx={{
+                      mr: 1,
+                      mb: 1,
+                      fontSize: '0.65rem',
+                      height: '22px',
+                      border: 'none',
+                      backgroundColor: typeColors.bg,
+                      color: typeColors.text,
+                      '& .MuiChip-label': {
+                        color: typeColors.text,
+                      },
+                      '& .MuiChip-icon': {
+                        marginLeft: '6px',
+                        color: typeColors.text,
+                      },
+                    }}
+                  />
+                );
+              })()}
 
               {/* Event Status Pill - Only for event cards */}
               {build.cardType === 'event' && (
@@ -299,7 +320,6 @@ function BuildDetailPage({ onToggleTheme }) {
                       : 'Featured'
                   }`}
                   size='small'
-                  color='warning'
                   sx={{
                     mr: 1,
                     mb: 1,
@@ -307,9 +327,15 @@ function BuildDetailPage({ onToggleTheme }) {
                     fontSize: '0.7rem',
                     height: '22px',
                     border: 'none',
+                    backgroundColor: spotlightColors.bg,
+                    color: spotlightColors.text,
                     boxShadow: 2,
+                    '& .MuiChip-label': {
+                      color: spotlightColors.text,
+                    },
                     '& .MuiChip-icon': {
                       marginLeft: '6px',
+                      color: spotlightColors.text,
                     },
                   }}
                 />
@@ -327,11 +353,15 @@ function BuildDetailPage({ onToggleTheme }) {
                 }}
               >
                 {/* Left side: Region & Build Chips */}
-                <Stack
-                  direction='row'
-                  spacing={0.5}
-                  flexWrap='wrap'
-                  sx={{ gap: 0.5, flex: 1 }}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    alignItems: 'center',
+                    flex: 1,
+                  }}
                 >
                   {/* Days Remaining Chip - Only for ongoing events */}
                   <DaysRemainingChip
@@ -360,7 +390,7 @@ function BuildDetailPage({ onToggleTheme }) {
                         iconSize='0.75rem'
                       />
                     ))}
-                </Stack>
+                </Box>
 
                 {/* Right side: Social Icons */}
                 <Box sx={{ display: 'flex', gap: 0.5 }}>

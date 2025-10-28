@@ -11,7 +11,6 @@ import {
   Box,
   IconButton,
   Chip,
-  Stack,
   Avatar,
   AvatarGroup,
   Snackbar,
@@ -215,11 +214,15 @@ function CardModal({ open, onClose, item }) {
           {((item.regions && item.regions.length > 0) ||
             (item.builds && item.builds.length > 0) ||
             daysRemaining !== null) && (
-            <Stack
-              direction='row'
-              spacing={0.5}
-              flexWrap='wrap'
-              sx={{ gap: 0.5, flex: 1 }}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 1,
+                alignItems: 'center',
+                flex: 1,
+              }}
             >
               {/* Days Remaining Chip - Only for ongoing events */}
               <DaysRemainingChip
@@ -251,7 +254,7 @@ function CardModal({ open, onClose, item }) {
                     fontWeight='bold'
                   />
                 ))}
-            </Stack>
+            </Box>
           )}
 
           {/* Social Icons */}

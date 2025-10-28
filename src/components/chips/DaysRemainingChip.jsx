@@ -1,10 +1,11 @@
 // src/components/chips/DaysRemainingChip.jsx
 import React from 'react';
-import { Chip } from '@mui/material';
+import { Chip, useTheme } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
+import { daysRemainingColor, pastelColors } from '../../utils/cardUtils';
 
 /**
- * Reusable Days Remaining Chip Component
+ * Reusable Days Remaining Chip Component with Pastel Colors
  * @param {number} daysRemaining - Number of days remaining
  * @param {string} size - Chip size ('small' or 'medium')
  * @param {string} fontSize - Font size (e.g., '0.65rem', '0.75rem')
@@ -21,7 +22,12 @@ const DaysRemainingChip = ({
   fontWeight = 'normal',
   sx = {},
 }) => {
+  const theme = useTheme();
+
   if (daysRemaining === null || daysRemaining === undefined) return null;
+
+  const mode = theme.palette.mode;
+  const colors = pastelColors[daysRemainingColor][mode];
 
   return (
     <Chip
@@ -35,16 +41,19 @@ const DaysRemainingChip = ({
       }
       label={`${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left`}
       size={size}
-      color='warning'
-      variant='filled'
       sx={{
         fontWeight: fontWeight,
         fontSize: fontSize,
         height: height,
         border: 'none',
-        color: (theme) => (theme.palette.mode === 'dark' ? '#000' : undefined),
+        backgroundColor: colors.bg,
+        color: colors.text,
+        '& .MuiChip-label': {
+          color: colors.text,
+        },
         '& .MuiChip-icon': {
           marginLeft: fontSize === '0.65rem' ? '6px' : '8px',
+          color: colors.text,
         },
         ...sx,
       }}
@@ -53,4 +62,3 @@ const DaysRemainingChip = ({
 };
 
 export default DaysRemainingChip;
-

@@ -33,32 +33,92 @@ export const buildIcons = {
 // Region icon (same for all regions)
 export const RegionIcon = LanguageIcon;
 
-// Color mappings for regions
-export const regionColors = {
-  'North America': 'error',
-  Europe: 'info',
-  'South America': 'warning',
-  'Southeast Asia': 'success',
-  Asia: 'warning',
-  'Other Regions': 'secondary',
-  'Custom Server': 'primary',
+// Pastel color system inspired by modern bookmark designs
+// Light mode: pastel backgrounds with darker contrasting text
+// Dark mode: dark backgrounds (#090f21) with bright colored text
+export const pastelColors = {
+  red: {
+    light: { bg: '#FFE5E5', text: '#C41E3A' },
+    dark: { bg: '#090f21', text: '#FF8FA3' },
+  },
+  pink: {
+    light: { bg: '#FFE5F5', text: '#C2185B' },
+    dark: { bg: '#090f21', text: '#FF88CC' },
+  },
+  purple: {
+    light: { bg: '#F0E5FF', text: '#6A1B9A' },
+    dark: { bg: '#090f21', text: '#B388FF' },
+  },
+  blue: {
+    light: { bg: '#E5F0FF', text: '#1565C0' },
+    dark: { bg: '#090f21', text: '#82B1FF' },
+  },
+  cyan: {
+    light: { bg: '#E5FAFF', text: '#00838F' },
+    dark: { bg: '#090f21', text: '#84FFFF' },
+  },
+  teal: {
+    light: { bg: '#E5FFF5', text: '#00695C' },
+    dark: { bg: '#090f21', text: '#64FFDA' },
+  },
+  green: {
+    light: { bg: '#E5FFF0', text: '#2E7D32' },
+    dark: { bg: '#090f21', text: '#69F0AE' },
+  },
+  lime: {
+    light: { bg: '#F5FFE5', text: '#558B2F' },
+    dark: { bg: '#090f21', text: '#B2FF59' },
+  },
+  yellow: {
+    light: { bg: '#FFF9E5', text: '#F57C00' },
+    dark: { bg: '#090f21', text: '#FFD54F' },
+  },
+  orange: {
+    light: { bg: '#FFF3E5', text: '#E65100' },
+    dark: { bg: '#090f21', text: '#FFAB40' },
+  },
+  gray: {
+    light: { bg: '#F5F5F5', text: '#424242' },
+    dark: { bg: '#090f21', text: '#BDBDBD' },
+  },
 };
 
-// Color mappings for build categories
-export const buildColors = {
-  'Base Design': 'error',
-  'Room Design': 'secondary',
-  'City Build': 'primary',
-  Tutorial: 'info',
-  Outfit: 'primary',
-  Character: 'warning',
-  Decoration: 'success',
-  Bug: 'error',
-  'Weapon Build': 'secondary',
-  Deviation: 'warning',
-  Update: 'info',
-  Class: 'success',
+// Color mappings for regions (using pastel colors)
+export const regionColors = {
+  'North America': 'red',
+  Europe: 'blue',
+  'South America': 'orange',
+  'Southeast Asia': 'green',
+  Asia: 'yellow',
+  'Other Regions': 'gray',
+  'Custom Server': 'purple',
 };
+
+// Color mappings for build categories (using pastel colors)
+export const buildColors = {
+  'Base Design': 'red',
+  'Room Design': 'purple',
+  'City Build': 'blue',
+  Tutorial: 'cyan',
+  Outfit: 'pink',
+  Character: 'orange',
+  Decoration: 'green',
+  Bug: 'red',
+  'Weapon Build': 'orange',
+  Deviation: 'yellow',
+  Update: 'teal',
+  Class: 'lime',
+};
+
+// Event status colors
+export const eventStatusColors = {
+  Upcoming: 'blue',
+  Ongoing: 'green',
+  'Event Ended': 'gray',
+};
+
+// Days remaining color
+export const daysRemainingColor = 'yellow';
 
 /**
  * Calculate event status based on start and end dates
@@ -81,11 +141,11 @@ export const getEventStatus = (eventStartDate, eventEndDate) => {
   endDate.setHours(0, 0, 0, 0);
 
   if (today < startDate) {
-    return { label: 'Upcoming', color: 'info' };
+    return { label: 'Upcoming', color: eventStatusColors.Upcoming };
   } else if (today >= startDate && today <= endDate) {
-    return { label: 'Ongoing', color: 'success' };
+    return { label: 'Ongoing', color: eventStatusColors.Ongoing };
   } else {
-    return { label: 'Event Ended', color: 'default' };
+    return { label: 'Event Ended', color: eventStatusColors['Event Ended'] };
   }
 };
 

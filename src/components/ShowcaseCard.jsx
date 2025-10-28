@@ -9,10 +9,10 @@ import {
   Avatar,
   AvatarGroup,
   Chip,
-  Stack,
   IconButton,
   Snackbar,
   Alert,
+  useTheme,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -25,6 +25,7 @@ import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'; // Builder Spot
 import DescriptionWithLinks from './DescriptionWithLinks';
 import RegionChip from './chips/RegionChip';
 import CategoryChip from './chips/CategoryChip';
+import { pastelColors } from '../utils/cardUtils';
 
 // Styled Card matching MUI template
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -32,7 +33,10 @@ const StyledCard = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   padding: 0,
   height: '100%',
-  backgroundColor: (theme.vars || theme).palette.background.paper,
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? (theme.vars || theme).palette.background.paper
+      : '#ffffff',
   '&:hover': {
     backgroundColor: 'transparent',
     cursor: 'pointer',
@@ -125,6 +129,8 @@ function Author({ email, timestamp }) {
 
 function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const theme = useTheme();
+  const mode = theme.palette.mode;
 
   const handleCopyLink = (e) => {
     e.stopPropagation();
@@ -139,6 +145,12 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
     }
     setSnackbarOpen(false);
   };
+
+  // Pastel colors for Builder Spotlight and card type pills
+  const spotlightColors = pastelColors.orange[mode];
+  const showcaseColors = pastelColors.red[mode];
+  const galleryColors = pastelColors.blue[mode];
+  const eventColors = pastelColors.yellow[mode];
 
   // Determine image aspect ratio and height based on layout
   const getImageStyle = () => {
@@ -217,7 +229,6 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
                   : 'Featured'
               }`}
               size='small'
-              color='warning'
               sx={{
                 position: 'absolute',
                 top: 12,
@@ -226,9 +237,15 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
                 fontSize: '0.7rem',
                 height: '22px',
                 border: 'none',
+                backgroundColor: spotlightColors.bg,
+                color: spotlightColors.text,
                 boxShadow: 2,
+                '& .MuiChip-label': {
+                  color: spotlightColors.text,
+                },
                 '& .MuiChip-icon': {
                   marginLeft: '6px',
+                  color: spotlightColors.text,
                 },
               }}
             />
@@ -237,63 +254,69 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
       )}
       <StyledCardContent>
         {/* Card Type Pill with Icon - Conditionally rendered */}
-        {showTypePill && (
-          <Chip
-            icon={
-              item.cardType === 'showcase' ? (
-                <ViewCarouselIcon
-                  sx={{
-                    fontSize: '0.85rem !important',
-                    color: 'inherit !important',
-                  }}
-                />
-              ) : item.cardType === 'gallery' ? (
-                <CollectionsIcon
-                  sx={{
-                    fontSize: '0.85rem !important',
-                    color: 'inherit !important',
-                  }}
-                />
-              ) : (
-                <EventIcon
-                  sx={{
-                    fontSize: '0.85rem !important',
-                    color: 'inherit !important',
-                  }}
-                />
-              )
-            }
-            label={
+        {showTypePill &&
+          (() => {
+            const typeColors =
               item.cardType === 'showcase'
-                ? 'Showcase'
+                ? showcaseColors
                 : item.cardType === 'gallery'
-                ? 'Gallery'
-                : 'Event'
-            }
-            size='small'
-            color={
-              item.cardType === 'showcase'
-                ? 'error'
-                : item.cardType === 'gallery'
-                ? 'info'
-                : 'warning'
-            }
-            variant='filled'
-            sx={{
-              alignSelf: 'flex-start',
-              fontWeight: 'bold',
-              fontSize: '0.65rem',
-              height: '22px',
-              border: 'none',
-              color: (theme) =>
-                theme.palette.mode === 'dark' ? '#000' : undefined,
-              mb: 1,
-              '& .MuiChip-icon': {
-                marginLeft: '6px',
-              },
-            }}
-          />
-        )}
+                ? galleryColors
+                : eventColors;
+
+            return (
+              <Chip
+                icon={
+                  item.cardType === 'showcase' ? (
+                    <ViewCarouselIcon
+                      sx={{
+                        fontSize: '0.85rem !important',
+                        color: 'inherit !important',
+                      }}
+                    />
+                  ) : item.cardType === 'gallery' ? (
+                    <CollectionsIcon
+                      sx={{
+                        fontSize: '0.85rem !important',
+                        color: 'inherit !important',
+                      }}
+                    />
+                  ) : (
+                    <EventIcon
+                      sx={{
+                        fontSize: '0.85rem !important',
+                        color: 'inherit !important',
+                      }}
+                    />
+                  )
+                }
+                label={
+                  item.cardType === 'showcase'
+                    ? 'Showcase'
+                    : item.cardType === 'gallery'
+                    ? 'Gallery'
+                    : 'Event'
+                }
+                size='small'
+                sx={{
+                  alignSelf: 'flex-start',
+                  fontWeight: 'bold',
+                  fontSize: '0.65rem',
+                  height: '22px',
+                  border: 'none',
+                  backgroundColor: typeColors.bg,
+                  color: typeColors.text,
+                  mb: 1,
+                  '& .MuiChip-label': {
+                    color: typeColors.text,
+                  },
+                  '& .MuiChip-icon': {
+                    marginLeft: '6px',
+                    color: typeColors.text,
+                  },
+                }}
+              />
+            );
+          })()}
 
         {/* Display Region/Build Chips and Social Icons */}
         <Box
@@ -305,11 +328,15 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
             mb: 1,
           }}
         >
-          <Stack
-            direction='row'
-            spacing={0.5}
-            flexWrap='wrap'
-            sx={{ gap: 0.5, flex: 1 }}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: 1,
+              alignItems: 'center',
+              flex: 1,
+            }}
           >
             {item.regions &&
               item.regions
@@ -336,14 +363,11 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
                   />
                 ))}
             {(item.regions?.length > 2 || item.builds?.length > 2) && (
-              <Typography
-                variant='caption'
-                sx={{ ml: 0.5, alignSelf: 'center' }}
-              >
+              <Typography variant='caption' sx={{ alignSelf: 'center' }}>
                 +{(item.regions?.length || 0) + (item.builds?.length || 0) - 4}
               </Typography>
             )}
-          </Stack>
+          </Box>
 
           {/* YouTube, Discord, and Share Link Icons */}
           <Box sx={{ display: 'flex', gap: 0.5 }}>

@@ -1,9 +1,10 @@
 // src/components/chips/EventStatusChip.jsx
 import React from 'react';
-import { Chip } from '@mui/material';
+import { Chip, useTheme } from '@mui/material';
+import { pastelColors } from '../../utils/cardUtils';
 
 /**
- * Reusable Event Status Chip Component
+ * Reusable Event Status Chip Component with Pastel Colors
  * @param {Object} eventStatus - { label: string, color: string }
  * @param {string} size - Chip size ('small' or 'medium')
  * @param {string} fontSize - Font size (e.g., '0.7rem', '0.75rem')
@@ -18,25 +19,28 @@ const EventStatusChip = ({
   fontWeight = 'bold',
   sx = {},
 }) => {
+  const theme = useTheme();
+
   if (!eventStatus) return null;
+
+  const colorKey = eventStatus.color || 'gray';
+  const mode = theme.palette.mode;
+  const colors = pastelColors[colorKey]?.[mode] || pastelColors.gray[mode];
 
   return (
     <Chip
       label={eventStatus.label}
       size={size}
-      color={eventStatus.color}
-      variant='filled'
       sx={{
         fontWeight: fontWeight,
         fontSize: fontSize,
         height: height,
         border: 'none',
-        color: (theme) =>
-          eventStatus.color === 'default'
-            ? undefined
-            : theme.palette.mode === 'dark'
-            ? '#000'
-            : undefined,
+        backgroundColor: colors.bg,
+        color: colors.text,
+        '& .MuiChip-label': {
+          color: colors.text,
+        },
         ...sx,
       }}
     />
@@ -44,4 +48,3 @@ const EventStatusChip = ({
 };
 
 export default EventStatusChip;
-
