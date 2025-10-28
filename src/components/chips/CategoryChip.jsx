@@ -52,3 +52,4 @@ const CategoryChip = ({
 };
 
 export default CategoryChip;
+

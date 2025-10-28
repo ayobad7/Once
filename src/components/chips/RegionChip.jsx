@@ -48,3 +48,4 @@ const RegionChip = ({
 };
 
 export default RegionChip;
+

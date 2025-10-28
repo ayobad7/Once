@@ -44,3 +44,4 @@ const EventStatusChip = ({
 };
 
 export default EventStatusChip;
+
