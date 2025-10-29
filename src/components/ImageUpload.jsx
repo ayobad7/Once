@@ -1,85 +1,123 @@
-import React, { useState, useRef } from 'react';
+// src/components/ImageUpload.jsx
+import React, { useState } from 'react';
 import {
   Box,
   Button,
-  IconButton,
   Typography,
   LinearProgress,
   Alert,
+  IconButton,
   Stack,
-  Chip,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ImageIcon from '@mui/icons-material/Image';
 import { uploadToCloudinary } from '../config/cloudinary';
 
-const ImageUpload = ({
-  onUploadComplete,
+/**
+ * ImageUpload Component
+ * Handles drag & drop image uploads to Cloudinary
+ * @param {boolean} multiple - Allow multiple file uploads
+ * @param {function} onUploadComplete - Callback with uploaded URL(s)
+ * @param {string} label - Label for the upload area
+ */
+function ImageUpload({
   multiple = false,
+  onUploadComplete,
   label = 'Upload Images',
-}) => {
+}) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const [uploadedUrls, setUploadedUrls] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef(null);
+
+  const validateFile = (file) => {
+    // Check file type
+    const validTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ];
+    if (!validTypes.includes(file.type)) {
+      return 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.';
+    }
+
+    // Check file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return 'File size exceeds 10MB limit.';
+    }
+
+    return null;
+  };
 
   const handleFileSelect = async (files) => {
-    setError(null);
-    setUploading(true);
-    setUploadProgress(0);
-
+    setError('');
     const fileArray = Array.from(files);
-    const totalFiles = fileArray.length;
-    let completedFiles = 0;
-    const newUrls = [];
 
+    // Validate all files first
     for (const file of fileArray) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError(`${file.name} is not an image file`);
-        continue;
-      }
-
-      // Validate file size (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
-        setError(`${file.name} is too large. Max size is 10MB`);
-        continue;
-      }
-
-      try {
-        const result = await uploadToCloudinary(file);
-
-        if (result.success) {
-          newUrls.push(result.url);
-          completedFiles++;
-          setUploadProgress((completedFiles / totalFiles) * 100);
-        } else {
-          setError(result.error || 'Upload failed');
-        }
-      } catch (err) {
-        setError(`Failed to upload ${file.name}`);
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        return;
       }
     }
 
-    setUploading(false);
-    setUploadProgress(100);
+    // Upload files
+    setUploading(true);
+    setUploadProgress(0);
 
-    if (newUrls.length > 0) {
-      setUploadedUrls([...uploadedUrls, ...newUrls]);
-      if (onUploadComplete) {
-        onUploadComplete(multiple ? newUrls : newUrls[0]);
+    try {
+      const uploadedFiles = [];
+
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i];
+        const result = await uploadToCloudinary(file);
+
+        if (!result.success) {
+          throw new Error(result.error || 'Upload failed');
+        }
+
+        uploadedFiles.push(result.url);
+
+        // Update progress
+        setUploadProgress(((i + 1) / fileArray.length) * 100);
       }
+
+      // Update state with uploaded URLs
+      const newUrls = [...uploadedUrls, ...uploadedFiles];
+      setUploadedUrls(newUrls);
+
+      // Call parent callback
+      if (multiple) {
+        onUploadComplete(uploadedFiles); // Return array of new URLs
+      } else {
+        onUploadComplete(uploadedFiles[0]); // Return single URL
+      }
+
+      setUploading(false);
+      setUploadProgress(0);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Upload failed. Please try again.');
+      setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
+      if (!multiple && files.length > 1) {
+        setError('Only one file is allowed.');
+        return;
+      }
       handleFileSelect(files);
     }
   };
@@ -89,17 +127,18 @@ const ImageUpload = ({
     setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e) => {
+    e.preventDefault();
     setIsDragging(false);
   };
 
   const handleButtonClick = () => {
-    fileInputRef.current?.click();
+    document.getElementById(`file-input-${label.replace(/\s/g, '-')}`).click();
   };
 
   const handleFileInputChange = (e) => {
     const files = e.target.files;
-    if (files && files.length > 0) {
+    if (files.length > 0) {
       handleFileSelect(files);
     }
   };
@@ -110,78 +149,57 @@ const ImageUpload = ({
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      {/* Upload Area */}
+    <Box>
+      {/* Drag & Drop Area */}
       <Box
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         sx={{
-          border: 2,
-          borderStyle: 'dashed',
+          border: '2px dashed',
           borderColor: isDragging ? 'primary.main' : 'divider',
           borderRadius: 2,
           p: 4,
           textAlign: 'center',
-          backgroundColor: isDragging ? 'action.hover' : 'background.paper',
-          cursor: 'pointer',
+          bgcolor: isDragging ? 'action.hover' : 'background.paper',
           transition: 'all 0.2s',
-          '&:hover': {
-            borderColor: 'primary.main',
-            backgroundColor: 'action.hover',
-          },
+          cursor: 'pointer',
         }}
-        onClick={handleButtonClick}
       >
+        <CloudUploadIcon
+          sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }}
+        />
+        <Typography variant='h6' gutterBottom>
+          {label}
+        </Typography>
+        <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+          Drag & drop {multiple ? 'images' : 'an image'} here, or click to
+          browse
+        </Typography>
+        <Button
+          variant='contained'
+          onClick={handleButtonClick}
+          disabled={uploading}
+        >
+          Choose {multiple ? 'Files' : 'File'}
+        </Button>
+
+        {/* Hidden File Input */}
         <input
-          ref={fileInputRef}
+          id={`file-input-${label.replace(/\s/g, '-')}`}
           type='file'
-          accept='image/*'
+          accept='image/jpeg,image/jpg,image/png,image/gif,image/webp'
           multiple={multiple}
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
         />
-
-        <CloudUploadIcon
-          sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }}
-        />
-
-        <Typography variant='h6' gutterBottom>
-          {label}
-        </Typography>
-
-        <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-          Drag & drop images here, or click to select
-        </Typography>
-
-        <Button
-          variant='contained'
-          startIcon={<ImageIcon />}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleButtonClick();
-          }}
-        >
-          Choose Files
-        </Button>
-
-        <Typography
-          variant='caption'
-          display='block'
-          sx={{ mt: 2, color: 'text.secondary' }}
-        >
-          Supported: JPG, PNG, GIF, WebP (Max 10MB per file)
-        </Typography>
       </Box>
 
-      {/* Progress Bar */}
+      {/* Upload Progress */}
       {uploading && (
         <Box sx={{ mt: 2 }}>
           <LinearProgress variant='determinate' value={uploadProgress} />
-          <Typography
-            variant='caption'
-            sx={{ mt: 1, display: 'block', textAlign: 'center' }}
-          >
+          <Typography variant='caption' color='text.secondary' sx={{ mt: 1 }}>
             Uploading... {Math.round(uploadProgress)}%
           </Typography>
         </Box>
@@ -189,15 +207,17 @@ const ImageUpload = ({
 
       {/* Error Message */}
       {error && (
-        <Alert severity='error' sx={{ mt: 2 }} onClose={() => setError(null)}>
+        <Alert severity='error' sx={{ mt: 2 }} onClose={() => setError('')}>
           {error}
         </Alert>
       )}
 
-      {/* Uploaded URLs */}
+      {/* Uploaded Images Preview */}
       {uploadedUrls.length > 0 && (
         <Stack spacing={1} sx={{ mt: 2 }}>
-          <Typography variant='subtitle2'>Uploaded Images:</Typography>
+          <Typography variant='subtitle2' color='text.secondary'>
+            Uploaded Images:
+          </Typography>
           {uploadedUrls.map((url, index) => (
             <Box
               key={index}
@@ -206,14 +226,14 @@ const ImageUpload = ({
                 alignItems: 'center',
                 gap: 1,
                 p: 1,
-                border: 1,
+                border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 1,
               }}
             >
               <img
                 src={url}
-                alt={`Uploaded ${index + 1}`}
+                alt={`Upload ${index + 1}`}
                 style={{
                   width: 60,
                   height: 60,
@@ -230,12 +250,13 @@ const ImageUpload = ({
                   whiteSpace: 'nowrap',
                 }}
               >
-                {url}
+                {url.substring(url.lastIndexOf('/') + 1)}
               </Typography>
               <IconButton
                 size='small'
-                onClick={() => removeUrl(index)}
                 color='error'
+                onClick={() => removeUrl(index)}
+                title='Remove'
               >
                 <DeleteIcon fontSize='small' />
               </IconButton>
@@ -245,6 +266,6 @@ const ImageUpload = ({
       )}
     </Box>
   );
-};
+}
 
 export default ImageUpload;

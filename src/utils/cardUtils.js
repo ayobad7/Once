@@ -173,5 +173,5 @@ export const getDaysRemaining = (eventStartDate, eventEndDate) => {
   const timeDiff = endDate - today;
   const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-  return daysLeft > 0 ? daysLeft : null;
+  return daysLeft >= 0 ? daysLeft : null;
 };

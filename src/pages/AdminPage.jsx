@@ -28,6 +28,7 @@ import {
   Radio,
   RadioGroup,
   InputAdornment,
+  Pagination,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
@@ -81,6 +82,8 @@ function AdminPage() {
   const [editingId, setEditingId] = useState(null);
   const [filterType, setFilterType] = useState('all'); // 'all', 'showcase', 'gallery', 'event'
   const [searchQuery, setSearchQuery] = useState(''); // Search query for filtering
+  const [currentPage, setCurrentPage] = useState(1); // Pagination state
+  const itemsPerPage = 20; // Items per page
 
   // Link modal states
   const [linkModalOpen, setLinkModalOpen] = useState(false);
@@ -91,6 +94,11 @@ function AdminPage() {
   const navigate = useNavigate();
   const auth = getAuth();
   const descriptionRef = useRef(null);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, searchQuery]);
 
   // Chip options with MUI theme-aware colors
   const regionOptions = [
@@ -918,8 +926,9 @@ function AdminPage() {
         </Box>
 
         <Grid container spacing={2}>
-          {galleryItems
-            .filter((item) => {
+          {(() => {
+            // Filter items first
+            const filteredItems = galleryItems.filter((item) => {
               // Filter by card type
               const matchesType =
                 filterType === 'all' ? true : item.cardType === filterType;
@@ -933,8 +942,15 @@ function AdminPage() {
                   .includes(searchQuery.toLowerCase());
 
               return matchesType && matchesSearch;
-            })
-            .map((item) => (
+            });
+
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+            return paginatedItems.map((item) => (
               <Grid item xs={12} sm={6} md={3} key={item.id}>
                 <Card
                   variant='outlined'
@@ -1115,32 +1131,81 @@ function AdminPage() {
                   </Box>
                 </Card>
               </Grid>
-            ))}
+            ));
+          })()}
         </Grid>
 
+        {/* Pagination */}
+        {(() => {
+          const filteredItems = galleryItems.filter((item) => {
+            const matchesType =
+              filterType === 'all' ? true : item.cardType === filterType;
+            const matchesSearch =
+              searchQuery.trim() === '' ||
+              item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.description
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase());
+            return matchesType && matchesSearch;
+          });
+
+          const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+          return (
+            filteredItems.length > itemsPerPage && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  mt: 4,
+                  mb: 2,
+                }}
+              >
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={(event, page) => setCurrentPage(page)}
+                  color='primary'
+                  size='large'
+                  showFirstButton
+                  showLastButton
+                />
+              </Box>
+            )
+          );
+        })()}
+
         {/* Empty State */}
-        {galleryItems.filter((item) => {
-          const matchesType =
-            filterType === 'all' ? true : item.cardType === filterType;
-          const matchesSearch =
-            searchQuery.trim() === '' ||
-            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-          return matchesType && matchesSearch;
-        }).length === 0 && (
-          <Typography
-            variant='body1'
-            align='center'
-            color='text.secondary'
-            sx={{ mt: 4 }}
-          >
-            {searchQuery.trim() !== ''
-              ? `No items match "${searchQuery}"`
-              : filterType === 'all'
-              ? 'No items yet. Create your first item above!'
-              : `No ${filterType} items found.`}
-          </Typography>
-        )}
+        {(() => {
+          const filteredItems = galleryItems.filter((item) => {
+            const matchesType =
+              filterType === 'all' ? true : item.cardType === filterType;
+            const matchesSearch =
+              searchQuery.trim() === '' ||
+              item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.description
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase());
+            return matchesType && matchesSearch;
+          });
+
+          return (
+            filteredItems.length === 0 && (
+              <Typography
+                variant='body1'
+                align='center'
+                color='text.secondary'
+                sx={{ mt: 4 }}
+              >
+                {searchQuery.trim() !== ''
+                  ? `No items match "${searchQuery}"`
+                  : filterType === 'all'
+                  ? 'No items yet. Create your first item above!'
+                  : `No ${filterType} items found.`}
+              </Typography>
+            )
+          );
+        })()}
       </Box>
 
       <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
