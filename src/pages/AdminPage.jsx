@@ -753,16 +753,16 @@ function AdminPage() {
             {/* Additional Images - Full width like title */}
             <Box sx={{ mt: 3 }}>
               <FormLabel component='legend' sx={{ mb: 2 }}>
-                Additional Images (Up to 8)
+                Additional Images (Up to 9)
               </FormLabel>
               <ImageUpload
                 label='Upload Additional Images (Gallery)'
                 multiple={true}
                 onUploadComplete={(urls) => {
                   const newAdditionalImages = [...formData.additionalImages];
-                  // Add new URLs to existing ones (up to 8 total)
+                  // Add new URLs to existing ones (up to 9 total)
                   urls.forEach((url) => {
-                    if (newAdditionalImages.length < 8) {
+                    if (newAdditionalImages.length < 9) {
                       newAdditionalImages.push(url);
                     }
                   });

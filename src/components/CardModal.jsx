@@ -381,7 +381,7 @@ function CardModal({ open, onClose, item }) {
         <Typography
           variant='body1'
           color='text.primary'
-          sx={{ mb: 2, fontWeight: 300 }}
+          sx={{ mb: 2, fontWeight: 300, whiteSpace: 'pre-wrap' }}
         >
           <DescriptionWithLinks description={item.description} />
         </Typography>

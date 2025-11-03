@@ -67,6 +67,7 @@ const StyledTypography = styled(Typography)({
   WebkitLineClamp: 2,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  whiteSpace: 'pre-wrap',
 });
 
 // Author section component

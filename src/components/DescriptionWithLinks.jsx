@@ -18,7 +18,12 @@ function DescriptionWithLinks({ description, ...props }) {
   while ((match = linkRegex.exec(description)) !== null) {
     // Add text before the link
     if (match.index > lastIndex) {
-      parts.push(description.substring(lastIndex, match.index));
+      const textBefore = description.substring(lastIndex, match.index);
+      parts.push(
+        <span key={`text-${lastIndex}`} style={{ whiteSpace: 'pre-wrap' }}>
+          {textBefore}
+        </span>
+      );
     }
 
     // Add the link
@@ -48,16 +53,23 @@ function DescriptionWithLinks({ description, ...props }) {
 
   // Add remaining text after the last link
   if (lastIndex < description.length) {
-    parts.push(description.substring(lastIndex));
+    parts.push(
+      <span key={`text-${lastIndex}`} style={{ whiteSpace: 'pre-wrap' }}>
+        {description.substring(lastIndex)}
+      </span>
+    );
   }
 
-  // If no links found, just return the plain text
+  // If no links found, just return the plain text with line breaks preserved
   if (parts.length === 0) {
-    return <span {...props}>{description}</span>;
+    return (
+      <span {...props} style={{ whiteSpace: 'pre-wrap' }}>
+        {description}
+      </span>
+    );
   }
 
   return <span {...props}>{parts}</span>;
 }
 
 export default DescriptionWithLinks;
-

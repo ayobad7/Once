@@ -443,7 +443,10 @@ function BuildDetailPage({ onToggleTheme }) {
             </Box>
 
             {/* Description */}
-            <Typography variant='body1' sx={{ mb: 4, fontWeight: 300 }}>
+            <Typography
+              variant='body1'
+              sx={{ mb: 4, fontWeight: 300, whiteSpace: 'pre-wrap' }}
+            >
               <DescriptionWithLinks description={build.description} />
             </Typography>
 
