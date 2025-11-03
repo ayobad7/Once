@@ -426,7 +426,7 @@ function BuildDetailPage({ onToggleTheme }) {
                     size='small'
                     onClick={handleCopyLink}
                     sx={{
-                      padding: '4.1px',
+                      padding: '4px',
                       color: 'text.primary',
                       '&:hover': {
                         backgroundColor: (theme) =>
