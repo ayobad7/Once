@@ -447,7 +447,10 @@ function BuildDetailPage({ onToggleTheme }) {
               variant='body1'
               sx={{ mb: 4, fontWeight: 300, whiteSpace: 'pre-wrap' }}
             >
-              <DescriptionWithLinks description={build.description} />
+              <DescriptionWithLinks 
+                description={build.description} 
+                descriptionFormat={build.descriptionFormat}
+              />
             </Typography>
 
             {/* Image Gallery */}

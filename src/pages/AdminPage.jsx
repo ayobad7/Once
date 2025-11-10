@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
-  TextField,
+ TextField,
   Button,
   Card,
   CardContent,
@@ -29,6 +29,7 @@ import {
   RadioGroup,
   InputAdornment,
   Pagination,
+  Snackbar,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
@@ -36,6 +37,7 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import HomeIcon from '@mui/icons-material/Home';
 import LinkIcon from '@mui/icons-material/Link'; // Link icon for adding links
+import CodeIcon from '@mui/icons-material/Code'; // HTML format icon
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import CloseIcon from '@mui/icons-material/Close'; // Close icon
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel'; // Showcase icon
@@ -76,7 +78,15 @@ function AdminPage() {
   });
   const [galleryItems, setGalleryItems] = useState([]);
   const [message, setMessage] = useState('');
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Show toast message
+  const showToast = (message) => {
+    setToastMessage(message);
+    setToastOpen(true);
+  };
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -90,6 +100,9 @@ function AdminPage() {
   const [linkText, setLinkText] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
+  
+  // Description format mode
+  const [descriptionFormat, setDescriptionFormat] = useState('text'); // 'text' or 'html'
 
   const navigate = useNavigate();
   const auth = getAuth();
@@ -266,6 +279,7 @@ function AdminPage() {
       const itemData = {
         title: formData.title,
         description: formData.description,
+        descriptionFormat: descriptionFormat, // Store the format type
         image: formData.imageUrl, // Main image URL
         email: userEmail, // Auto-detected from logged-in user
         additionalImages: formData.additionalImages.filter(
@@ -284,7 +298,7 @@ function AdminPage() {
         // Update existing item
         const itemRef = doc(db, 'galleryItems', editingId);
         await updateDoc(itemRef, itemData);
-        setMessage('Gallery item updated successfully!');
+        showToast('Gallery item updated successfully!');
         setIsEditing(false);
         setEditingId(null);
       } else {
@@ -295,7 +309,7 @@ function AdminPage() {
           isSpotlight: false, // Default to not spotlight
           spotlightDate: null, // Will be set when starred
         });
-        setMessage('Gallery item added successfully!');
+        showToast('Gallery item added successfully!');
       }
 
       setFormData({
@@ -332,7 +346,7 @@ function AdminPage() {
     if (itemToDelete) {
       try {
         await deleteDoc(doc(db, 'galleryItems', itemToDelete)); // Delete using the document ID
-        setMessage('Gallery item deleted successfully!');
+        showToast('Gallery item deleted successfully!');
         setDeleteDialogOpen(false);
         setItemToDelete(null);
         loadGalleryItems(); // Refresh the list
@@ -375,6 +389,8 @@ function AdminPage() {
       eventStartDate: item.eventStartDate || '',
       eventEndDate: item.eventEndDate || '',
     });
+    // Set the description format for editing
+    setDescriptionFormat(item.descriptionFormat || 'text');
     setIsEditing(true);
     setEditingId(item.id);
     setMessage('');
@@ -424,7 +440,7 @@ function AdminPage() {
         });
       }
 
-      setMessage(
+      showToast(
         !currentSpotlightStatus
           ? 'Item set as spotlight!'
           : 'Spotlight removed!'
@@ -552,7 +568,7 @@ function AdminPage() {
               required
             />
 
-            {/* Description with Link Button */}
+            {/* Description with Link Button and Format Toggle */}
             <Box sx={{ mt: 2 }}>
               <Box
                 sx={{
@@ -565,19 +581,34 @@ function AdminPage() {
                 <Typography variant='body2' color='text.secondary'>
                   Description *
                 </Typography>
-                <IconButton
-                  size='small'
-                  onClick={handleOpenLinkModal}
-                  color='primary'
-                  title='Add Link'
-                  sx={{
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: '8px',
-                  }}
-                >
-                  <LinkIcon fontSize='small' />
-                </IconButton>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <IconButton
+                    size='small'
+                    onClick={() => setDescriptionFormat(descriptionFormat === 'text' ? 'html' : 'text')}
+                    color={descriptionFormat === 'html' ? 'primary' : 'default'}
+                    title={descriptionFormat === 'text' ? 'Switch to HTML format' : 'Switch to plain text format'}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <CodeIcon fontSize='small' />
+                  </IconButton>
+                  <IconButton
+                    size='small'
+                    onClick={handleOpenLinkModal}
+                    color='primary'
+                    title='Add Link'
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <LinkIcon fontSize='small' />
+                  </IconButton>
+                </Box>
               </Box>
               <TextField
                 fullWidth
@@ -585,10 +616,19 @@ function AdminPage() {
                 value={formData.description}
                 onChange={handleInputChange}
                 multiline
-                rows={3}
+                rows={descriptionFormat === 'html' ? 6 : 3}
                 required
-                placeholder='Enter description... Use the link button above to add links.'
+                placeholder={
+                  descriptionFormat === 'html' 
+                    ? 'Enter HTML content... Use the link button to add links.'
+                    : 'Enter description... Use the link button above to add links.'
+                }
                 ref={descriptionRef}
+                helperText={
+                  descriptionFormat === 'html' 
+                    ? 'HTML format enabled - content will render as HTML on the site'
+                    : 'Plain text format - use markdown [text](url) for links'
+                }
               />
             </Box>
 
@@ -1265,6 +1305,22 @@ function AdminPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Toast Notification */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={4000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setToastOpen(false)} 
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {toastMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

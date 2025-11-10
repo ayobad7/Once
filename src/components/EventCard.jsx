@@ -385,7 +385,10 @@ function EventCard({ item, onClick, showTypePill = false }) {
           </Typography>
 
           <StyledTypography variant='body2' color='text.secondary' gutterBottom>
-            <DescriptionWithLinks description={item.description} />
+            <DescriptionWithLinks 
+              description={item.description} 
+              descriptionFormat={item.descriptionFormat}
+            />
           </StyledTypography>
         </StyledCardContent>
 

@@ -423,7 +423,10 @@ function ShowcaseCard({ item, layout, onClick, showTypePill = false }) {
           {item.title}
         </Typography>
         <StyledTypography variant='body2' color='text.secondary' gutterBottom>
-          <DescriptionWithLinks description={item.description} />
+          <DescriptionWithLinks 
+            description={item.description} 
+            descriptionFormat={item.descriptionFormat}
+          />
         </StyledTypography>
       </StyledCardContent>
       <Author email={item.email} timestamp={item.timestamp} />

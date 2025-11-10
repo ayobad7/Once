@@ -3,10 +3,21 @@ import { Link as MuiLink } from '@mui/material';
 
 /**
  * Component to render description text with markdown-style links as clickable links
- * Converts [text](url) to clickable links
+ * Converts [text](url) to clickable links or renders HTML content
  */
-function DescriptionWithLinks({ description, ...props }) {
+function DescriptionWithLinks({ description, descriptionFormat = 'text', ...props }) {
   if (!description) return null;
+
+  // If format is HTML, render as HTML content
+  if (descriptionFormat === 'html') {
+    return (
+      <span 
+        {...props} 
+        dangerouslySetInnerHTML={{ __html: description }}
+        style={{ whiteSpace: 'pre-wrap' }}
+      />
+    );
+  }
 
   // Regex to match markdown links: [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;

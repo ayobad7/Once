@@ -383,7 +383,10 @@ function CardModal({ open, onClose, item }) {
           color='text.primary'
           sx={{ mb: 2, fontWeight: 300, whiteSpace: 'pre-wrap' }}
         >
-          <DescriptionWithLinks description={item.description} />
+          <DescriptionWithLinks 
+            description={item.description} 
+            descriptionFormat={item.descriptionFormat}
+          />
         </Typography>
 
         {/* Image Gallery */}
